@@ -1,0 +1,592 @@
+{
+  "template": {
+    "reportName": "Daily Diagnostics.twb",
+    "sourceWorkbook": "/home/user/Daily Diagnostics.twb",
+    "generatedAt": "2026-06-03T00:00:00Z"
+  },
+  "datasourcePaths": [
+    {
+      "workbookName": "sqlproxy.0cwbr6b196dmu111xqfnl0sa93bv (copy)",
+      "path": "/t/ovativegroup/datasources"
+    },
+    {
+      "workbookName": "sqlproxy.0cwbr6b196dmu111xqfnl0sa93bv",
+      "path": "/t/ovativegroup/datasources"
+    }
+  ],
+  "parameters": {
+    "End Date 2": {
+      "workbookName": "End Date (copy)_1874623398589362184",
+      "defaultValue": "#2026-05-16#",
+      "allowedValues": []
+    },
+    "End Date": {
+      "workbookName": "End Date",
+      "defaultValue": "#2026-05-16#",
+      "allowedValues": []
+    },
+    "KPI 1": {
+      "workbookName": "KPI 1",
+      "defaultValue": "Platform Orders",
+      "allowedValues": [
+        "Spend",
+        "CPM",
+        "Impressions",
+        "CTR",
+        "CPC",
+        "Clicks",
+        "Web Traffic",
+        "Web CVR",
+        "Web CPV",
+        "Web CPO",
+        "Web Orders",
+        "Web RPV",
+        "Web AOV",
+        "Web Revenue",
+        "Web ROAS",
+        "Total Web Revenue",
+        "\\% Total Web Revenue",
+        "Platform CVR",
+        "Platform Orders",
+        "Platform AOV",
+        "Platform Revenue",
+        "Platform ROAS"
+      ]
+    },
+    "KPI 4": {
+      "workbookName": "KPI 2 (copy) (copy)_4147041245412114433",
+      "defaultValue": "Clicks",
+      "allowedValues": [
+        "Spend",
+        "CPM",
+        "Impressions",
+        "CTR",
+        "CPC",
+        "Clicks",
+        "Web Traffic",
+        "Web CVR",
+        "Web CPV",
+        "Web CPO",
+        "Web Orders",
+        "Web RPV",
+        "Web AOV",
+        "Web Revenue",
+        "Web ROAS",
+        "Total Web Revenue",
+        "\\% Total Web Revenue",
+        "Platform CVR",
+        "Platform Orders",
+        "Platform AOV",
+        "Platform Revenue",
+        "Platform ROAS"
+      ]
+    },
+    "KPI 3": {
+      "workbookName": "KPI 2 (copy)_4147041245412098048",
+      "defaultValue": "Impressions",
+      "allowedValues": [
+        "Spend",
+        "CPM",
+        "Impressions",
+        "CTR",
+        "CPC",
+        "Clicks",
+        "Web Traffic",
+        "Web CVR",
+        "Web CPV",
+        "Web CPO",
+        "Web Orders",
+        "Web RPV",
+        "Web AOV",
+        "Web Revenue",
+        "Web ROAS",
+        "Total Web Revenue",
+        "\\% Total Web Revenue",
+        "Platform CVR",
+        "Platform Orders",
+        "Platform AOV",
+        "Platform Revenue",
+        "Platform ROAS"
+      ]
+    },
+    "KPI 2": {
+      "workbookName": "KPI 2",
+      "defaultValue": "CPC",
+      "allowedValues": [
+        "Spend",
+        "CPM",
+        "Impressions",
+        "CTR",
+        "CPC",
+        "Clicks",
+        "Web Traffic",
+        "Web CVR",
+        "Web CPV",
+        "Web CPO",
+        "Web Orders",
+        "Web RPV",
+        "Web AOV",
+        "Web Revenue",
+        "Web ROAS",
+        "Total Web Revenue",
+        "\\% Total Web Revenue",
+        "Platform CVR",
+        "Platform Orders",
+        "Platform AOV",
+        "Platform Revenue",
+        "Platform ROAS"
+      ]
+    },
+    "Primary KPI": {
+      "workbookName": "KPI 4 (copy)_4147041245423194114",
+      "defaultValue": "Spend",
+      "allowedValues": [
+        "Spend",
+        "CPM",
+        "Impressions",
+        "CTR",
+        "CPC",
+        "Clicks",
+        "Web Traffic",
+        "Web CVR",
+        "Web CPV",
+        "Web CPO",
+        "Web Orders",
+        "Web AOV",
+        "Web Revenue",
+        "Web ROAS",
+        "Total Web Revenue",
+        "\\% Total Web Revenue",
+        "Platform CVR",
+        "Platform Orders",
+        "Platform AOV",
+        "Platform Revenue",
+        "Platform ROAS"
+      ]
+    },
+    "Select Data Breakdown": {
+      "workbookName": "Parameter 1",
+      "defaultValue": "Channel",
+      "allowedValues": [
+        "Total",
+        "Channel",
+        "Channel + Subchannel"
+      ]
+    },
+    "Select Dimension": {
+      "workbookName": "Parameter 2",
+      "defaultValue": "Channel",
+      "allowedValues": [
+        "Date",
+        "Platform",
+        "Affiliate Partner",
+        "Channel",
+        "Subchannel",
+        "Funnel Stage",
+        "Campaign"
+      ]
+    },
+    "Select Measure Names": {
+      "workbookName": "Parameter 3",
+      "defaultValue": "Sales",
+      "allowedValues": [
+        "Sales",
+        "Sales LW",
+        "Sales LM",
+        "Sales LY",
+        "Clicks",
+        "Clicks LW",
+        "Clicks LM",
+        "Clicks LY"
+      ]
+    },
+    "Secondary KPI": {
+      "workbookName": "Primary KPI (copy)_4147041245423255555",
+      "defaultValue": "Spend",
+      "allowedValues": [
+        "Spend",
+        "CPM",
+        "Impressions",
+        "CTR",
+        "CPC",
+        "Clicks",
+        "Web Traffic",
+        "Web CVR",
+        "Web CPV",
+        "Web CPO",
+        "Web Orders",
+        "Web AOV",
+        "Web Revenue",
+        "Web ROAS",
+        "Total Web Revenue",
+        "\\% Total Web Revenue",
+        "Platform CVR",
+        "Platform Orders",
+        "Platform AOV",
+        "Platform Revenue",
+        "Platform ROAS"
+      ]
+    },
+    "Select Dimension 6": {
+      "workbookName": "Select Dimension (copy 2)_1874623398588661765",
+      "defaultValue": "Date",
+      "allowedValues": [
+        "Date",
+        "Platform",
+        "Affiliate Partner",
+        "Channel",
+        "Subchannel",
+        "Funnel Stage",
+        "Campaign"
+      ]
+    },
+    "Select Dimension 5": {
+      "workbookName": "Select Dimension (copy 3)_1874623398588674054",
+      "defaultValue": "Affiliate Partner",
+      "allowedValues": [
+        "Date",
+        "Platform",
+        "Affiliate Partner",
+        "Channel",
+        "Subchannel",
+        "Funnel Stage",
+        "Campaign"
+      ]
+    },
+    "Select Dimension 3": {
+      "workbookName": "Select Dimension (copy) (copy)_1874623398571962369",
+      "defaultValue": "Date",
+      "allowedValues": [
+        "Date",
+        "Platform",
+        "Affiliate Partner",
+        "Channel",
+        "Subchannel",
+        "Funnel Stage",
+        "Campaign"
+      ]
+    },
+    "Select Dimension 2": {
+      "workbookName": "Select Dimension (copy)_1874623398571950080",
+      "defaultValue": "Subchannel",
+      "allowedValues": [
+        "Date",
+        "Platform",
+        "Affiliate Partner",
+        "Channel",
+        "Subchannel",
+        "Funnel Stage",
+        "Campaign"
+      ]
+    },
+    "Select Dimension 4": {
+      "workbookName": "Select Dimension (copy)_1874623398588649476",
+      "defaultValue": "Date",
+      "allowedValues": [
+        "Date",
+        "Platform",
+        "Affiliate Partner",
+        "Channel",
+        "Subchannel",
+        "Funnel Stage",
+        "Campaign"
+      ]
+    },
+    "Start Date 2": {
+      "workbookName": "Start Date (copy)_1874623398589341703",
+      "defaultValue": "#2026-05-10#",
+      "allowedValues": []
+    },
+    "Start Date": {
+      "workbookName": "Start Date",
+      "defaultValue": "#2026-05-10#",
+      "allowedValues": []
+    }
+  },
+  "renamedFields": {
+    "FCST Clicks": {
+      "workbookName": "Calculation_1157706614091427840",
+      "formula": "[FCSTClicks]"
+    },
+    "FCST Impressions": {
+      "workbookName": "Calculation_1157706614091546625",
+      "formula": "[FCSTImpressions]"
+    },
+    "FCST Spend": {
+      "workbookName": "Calculation_1157706614092025858",
+      "formula": "[FCSTSpend]"
+    },
+    "FCST Web Orders": {
+      "workbookName": "Calculation_150026197254246400",
+      "formula": "[FCSTWebOrders]"
+    },
+    "FCST Web Revenue": {
+      "workbookName": "Calculation_150026197254369281",
+      "formula": "[FCSTWebRevenue]"
+    },
+    "FCST Web Traffic": {
+      "workbookName": "Calculation_150026197254533122",
+      "formula": "[FCSTWebTraffic]"
+    },
+    "Plan Web Orders": {
+      "workbookName": "Calculation_1567815645662691328",
+      "formula": "[PlanWebOrders]"
+    },
+    "Plan Web Revenue": {
+      "workbookName": "Calculation_1567815645662801921",
+      "formula": "[PlanWebRevenue]"
+    },
+    "Plan Web Traffic": {
+      "workbookName": "Calculation_1567815645662879746",
+      "formula": "[PlanWebTraffic]"
+    },
+    "Platform Orders": {
+      "workbookName": "Calculation_1567815645663096835",
+      "formula": "[PlatformOrders]"
+    },
+    "Platform Revenue": {
+      "workbookName": "Calculation_1567815645663498244",
+      "formula": "[PlatformRevenue]"
+    },
+    "Web Orders": {
+      "workbookName": "Calculation_1567815645664976901",
+      "formula": "[WebOrders]"
+    },
+    "Web Revenue": {
+      "workbookName": "Calculation_1567815645665357830",
+      "formula": "[WebRevenue]"
+    },
+    "Web Traffic": {
+      "workbookName": "Calculation_1567815645665693703",
+      "formula": "[WebTraffic]"
+    },
+    "Targeting Type": {
+      "workbookName": "Calculation_598415825521487872",
+      "formula": "[customDimension1]"
+    },
+    "Gender": {
+      "workbookName": "Calculation_598415825523118081",
+      "formula": "[customDimension2]"
+    },
+    "Product Category": {
+      "workbookName": "Calculation_598415825523388418",
+      "formula": "[customDimension3]"
+    },
+    "Tactic ": {
+      "workbookName": "Calculation_598415825523662852",
+      "formula": "[Tactic]"
+    },
+    "Product Type": {
+      "workbookName": "Calculation_598415825524023301",
+      "formula": "[customDimension5]"
+    },
+    "Category": {
+      "workbookName": "Calculation_598415825524154374",
+      "formula": "[customDimension3]"
+    },
+    "Parent Style": {
+      "workbookName": "Calculation_598415825524305927",
+      "formula": "[customDimension7]"
+    },
+    "Campaign Type": {
+      "workbookName": "Calculation_598415825524457480",
+      "formula": "[customDimension4]"
+    },
+    "SubChannel": {
+      "workbookName": "Calculation_598415825524580361",
+      "formula": "[Subchannel]"
+    },
+    "Funnel Stage": {
+      "workbookName": "Calculation_598415825524805642",
+      "formula": "[customDimension10]"
+    },
+    "Campaign Name": {
+      "workbookName": "Calculation_598415825525301259",
+      "formula": "[CampaignName]"
+    },
+    "Ad Group Name": {
+      "workbookName": "Calculation_598415825526128652",
+      "formula": "[AdGroupName]"
+    },
+    "Audience Type": {
+      "workbookName": "Calculation_598415825526247437",
+      "formula": "[AudienceType]"
+    },
+    "Clicks LM": {
+      "workbookName": "Clicks_LM (copy)_4607252810079092742",
+      "formula": "[Clicks_LM]"
+    },
+    "Clicks LW": {
+      "workbookName": "Clicks_LW (copy)_4607252810079092743",
+      "formula": "[Clicks_LW]"
+    },
+    "Clicks LY": {
+      "workbookName": "Clicks_LY (copy)_4607252810079092744",
+      "formula": "[Clicks_LY]"
+    },
+    "Impressions LM": {
+      "workbookName": "Impressions_LM (copy)_4607252810079092745",
+      "formula": "[Impressions_LM]"
+    },
+    "Impressions LW": {
+      "workbookName": "Impressions_LW (copy)_4607252810079092746",
+      "formula": "[Impressions_LW]"
+    },
+    "Impressions LY": {
+      "workbookName": "Impressions_LY (copy)_4607252810079092747",
+      "formula": "[Impressions_LY]"
+    },
+    "Platform Orders LM": {
+      "workbookName": "PlatformOrders_LM (copy)_4607252810079092748",
+      "formula": "[PlatformOrders_LM]"
+    },
+    "Platform Orders LW": {
+      "workbookName": "PlatformOrders_LW (copy)_4607252810079092749",
+      "formula": "[PlatformOrders_LW]"
+    },
+    "Platform Orders LY": {
+      "workbookName": "PlatformOrders_LY (copy)_4607252810079092750",
+      "formula": "[PlatformOrders_LY]"
+    },
+    "Platform Revenue LM": {
+      "workbookName": "PlatformRevenue_LM (copy)_4607252810079092751",
+      "formula": "[PlatformRevenue_LM]"
+    },
+    "Platform Revenue LW": {
+      "workbookName": "PlatformRevenue_LW (copy)_4607252810079092752",
+      "formula": "[PlatformRevenue_LW]"
+    },
+    "Platform Revenue LY": {
+      "workbookName": "PlatformRevenue_LY (copy)_4607252810079092753",
+      "formula": "[PlatformRevenue_LY]"
+    },
+    "Spend LM": {
+      "workbookName": "Spend_LM (copy)_4607252810079092754",
+      "formula": "[Spend_LM]"
+    },
+    "Spend LW": {
+      "workbookName": "Spend_LW (copy)_4607252810079092755",
+      "formula": "[Spend_LW]"
+    },
+    "Spend LY": {
+      "workbookName": "Spend_LY (copy)_4607252809801973762",
+      "formula": "[Spend_LY]"
+    },
+    "Web Orders LM": {
+      "workbookName": "WebOrders_LM (copy)_4607252810079092756",
+      "formula": "[WebOrders_LM]"
+    },
+    "Web Orders LW": {
+      "workbookName": "WebOrders_LW (copy)_4607252810079092757",
+      "formula": "[WebOrders_LW]"
+    },
+    "Web Orders LY": {
+      "workbookName": "WebOrders_LY (copy)_4607252810079092758",
+      "formula": "[WebOrders_LY]"
+    },
+    "Web Revenue LM": {
+      "workbookName": "WebRevenue_LM (copy)_4607252810079092759",
+      "formula": "[WebRevenue_LM]"
+    },
+    "Web Revenue LW": {
+      "workbookName": "WebRevenue_LW (copy)_4607252810079092760",
+      "formula": "[WebRevenue_LW]"
+    },
+    "Web Revenue LY": {
+      "workbookName": "WebRevenue_LY (copy)_4607252810079092761",
+      "formula": "[WebRevenue_LY]"
+    },
+    "Web Traffic LM": {
+      "workbookName": "WebTraffic_LM (copy)_4607252810079092762",
+      "formula": "[WebTraffic_LM]"
+    },
+    "Web Traffic LW": {
+      "workbookName": "WebTraffic_LW (copy)_4607252810079092763",
+      "formula": "[WebTraffic_LW]"
+    },
+    "Web Traffic LY": {
+      "workbookName": "WebTraffic_LY (copy)_4607252810079092764",
+      "formula": "[WebTraffic_LY]"
+    }
+  },
+  "parameterDimensions": {
+    "Select Dimension": {
+      "workbookName": "Calculation_2456924749637644288",
+      "parameterCaption": "Select Dimension",
+      "cases": {
+        "Date": "STR([Date])",
+        "Platform": "[Calculation_662592154835116034]",
+        "Affiliate Partner": "[Calculation_662592154835017729]",
+        "Channel": "[Channel]",
+        "Subchannel": "[Calculation_598415825524580361]",
+        "Funnel Stage": "[Calculation_598415825524805642]",
+        "Campaign": "[Calculation_598415825525301259]"
+      }
+    },
+    "Select Dimension 3": {
+      "workbookName": "Select Dimension (copy 2)_1874623398572277763",
+      "parameterCaption": "Select Dimension 3",
+      "cases": {
+        "Date": "STR([Date])",
+        "Platform": "[Calculation_662592154835116034]",
+        "Affiliate Partner": "[Calculation_662592154835017729]",
+        "Channel": "[Channel]",
+        "Subchannel": "[Calculation_598415825524580361]",
+        "Funnel Stage": "[Calculation_598415825524805642]",
+        "Campaign": "[Calculation_598415825525301259]"
+      }
+    },
+    "Select Dimension 6": {
+      "workbookName": "Select Dimension (copy) (copy 2)_1874623398589947916",
+      "parameterCaption": "Select Dimension 6",
+      "cases": {
+        "Date": "STR([Date])",
+        "Platform": "[Calculation_662592154835116034]",
+        "Affiliate Partner": "[Calculation_662592154835017729]",
+        "Channel": "[Channel]",
+        "Subchannel": "[Calculation_598415825524580361]",
+        "Funnel Stage": "[Calculation_598415825524805642]",
+        "Campaign": "[Calculation_598415825525301259]"
+      }
+    },
+    "Select Dimension 5": {
+      "workbookName": "Select Dimension (copy) (copy)_1874623398589931531",
+      "parameterCaption": "Select Dimension 5",
+      "cases": {
+        "Date": "STR([Date])",
+        "Platform": "[Calculation_662592154835116034]",
+        "Affiliate Partner": "[Calculation_662592154835017729]",
+        "Channel": "[Channel]",
+        "Subchannel": "[Calculation_598415825524580361]",
+        "Funnel Stage": "[Calculation_598415825524805642]",
+        "Campaign": "[Calculation_598415825525301259]"
+      }
+    },
+    "Select Dimension 2": {
+      "workbookName": "Select Dimension (copy)_1874623398572261378",
+      "parameterCaption": "Select Dimension 2",
+      "cases": {
+        "Date": "STR([Date])",
+        "Platform": "[Calculation_662592154835116034]",
+        "Affiliate Partner": "[Calculation_662592154835017729]",
+        "Channel": "[Channel]",
+        "Subchannel": "[Calculation_598415825524580361]",
+        "Funnel Stage": "[Calculation_598415825524805642]",
+        "Campaign": "[Calculation_598415825525301259]"
+      }
+    },
+    "Select Dimension 4": {
+      "workbookName": "Select Dimension (copy)_1874623398589906954",
+      "parameterCaption": "Select Dimension 4",
+      "cases": {
+        "Date": "STR([Date])",
+        "Platform": "[Calculation_662592154835116034]",
+        "Affiliate Partner": "[Calculation_662592154835017729]",
+        "Channel": "[Channel]",
+        "Subchannel": "[Calculation_598415825524580361]",
+        "Funnel Stage": "[Calculation_598415825524805642]",
+        "Campaign": "[Calculation_598415825525301259]"
+      }
+    }
+  }
+}

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<workbook locale="en_GB" original-version="18.1" source-build="2025.2.2 (20252.25.0818.1050)" source-platform="mac" version="18.1">
+  <document-format-change-manifest>
+    <ObjectModelEncapsulateLegacy />
+    <ObjectModelTableType />
+    <SchemaViewerObjectModel />
+  </document-format-change-manifest>
+  <!-- Example: workbook-level UI and authoring preferences. These are not field definitions or chart formatting. -->
+  <preferences>
+    <preference name="ui.encoding.shelf.height" value="24" />
+    <preference name="ui.shelf.height" value="26" />
+  </preferences>
+  <!-- Example: workbook-wide style defaults that can cascade to worksheets. -->
+  <style>
+    <style-rule element="worksheet">
+      <format attr="font-family" value="Tableau Book" />
+      <format attr="font-size" value="9" />
+    </style-rule>
+  </style>
+  <datasources>
+    <!-- Example: dedicated Parameters datasource. Tableau commonly stores parameter definitions separately from your main data source. -->
+    <datasource hasconnection="false" inline="true" name="Parameters" version="18.1">
+      <aliases enabled="yes" />
+      <!-- Example parameter: range-style parameter with a default value and min/max bounds. -->
+      <column caption="Start Date" datatype="date" name="[Start Date]" param-domain-type="range" role="measure" type="quantitative" value="2026-01-01">
+        <calculation class="tableau" formula="#2026-01-01#" />
+        <range granularity="day" max="#2026-12-31#" min="#2025-01-01#" />
+      </column>
+      <!-- Example parameter: list-style parameter with allowed member values. -->
+      <column caption="Primary Metric" datatype="string" name="[Primary Metric]" param-domain-type="list" role="measure" type="nominal" value="Sales">
+        <calculation class="tableau" formula='"Sales"' />
+        <members>
+          <member value="Sales" />
+          <member value="Profit Ratio" />
+        </members>
+      </column>
+    </datasource>
+    <!-- Example: main datasource. This is where source mappings, dimensions, measures, and calculated fields usually live. -->
+    <datasource caption="example_fact_table" inline="true" name="example.main" version="18.1">
+      <!-- Example: connection block showing the logical source and raw column mappings. -->
+      <connection class="sqlproxy" dbname="example_fact_table" server="example.tableau.local" port="443" channel="https">
+        <relation name="sqlproxy" table="[sqlproxy]" type="table" />
+        <cols>
+          <map key="[Order Date]" value="[sqlproxy].[Order Date]" />
+          <map key="[Category]" value="[sqlproxy].[Category]" />
+          <map key="[Sales]" value="[sqlproxy].[Sales]" />
+          <map key="[Profit]" value="[sqlproxy].[Profit]" />
+          <map key="[Number of Records]" value="[sqlproxy].[Number of Records]" />
+        </cols>
+      </connection>
+      <aliases enabled="yes" />
+      <!-- Example field definition: dimension with date typing. -->
+      <column datatype="date" default-type="ordinal" name="[Order Date]" role="dimension" type="ordinal" />
+      <!-- Example field definition: nominal dimension. -->
+      <column datatype="string" default-type="nominal" name="[Category]" role="dimension" type="nominal" />
+      <!-- Example field definition: base measure with a default SUM aggregation. -->
+      <column aggregation="Sum" datatype="real" default-type="quantitative" name="[Sales]" role="measure" type="quantitative" />
+      <column aggregation="Sum" datatype="real" default-type="quantitative" name="[Profit]" role="measure" type="quantitative" />
+      <!-- Example special field: Number of Records implemented as a simple calc of 1. -->
+      <column aggregation="Sum" datatype="integer" default-type="quantitative" name="[Number of Records]" role="measure" type="quantitative">
+        <calculation class="tableau" formula="1" />
+      </column>
+      <!-- Example calculated metric: this is where a derived measure formula is defined. -->
+      <column caption="Profit Ratio" datatype="real" default-type="quantitative" name="[Calculation_Profit Ratio]" role="measure" type="quantitative">
+        <calculation class="tableau" formula="SUM([Profit]) / SUM([Sales])" />
+      </column>
+    </datasource>
+  </datasources>
+  <worksheets>
+    <!-- Example worksheet. This section shows how Tableau ties field usage to a specific view. -->
+    <worksheet name="Example Sheet">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true">Example Sheet</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <table>
+        <!-- Example view block: lists datasources, field dependencies, and filter usage for this worksheet. -->
+        <view>
+          <datasources>
+            <datasource caption="example_fact_table" name="example.main" />
+            <datasource name="Parameters" />
+          </datasources>
+          <!-- Example worksheet-local parameter usage. These are references, not the master definitions. -->
+          <datasource-dependencies datasource="Parameters">
+            <column datatype="date" name="[Start Date]" role="measure" type="quantitative" />
+            <column datatype="string" name="[Primary Metric]" role="measure" type="nominal" />
+          </datasource-dependencies>
+          <!-- Example worksheet-local field usage. Tableau repeats referenced fields here for the sheet. -->
+          <datasource-dependencies datasource="example.main">
+            <column datatype="date" name="[Order Date]" role="dimension" type="ordinal" />
+            <column datatype="string" name="[Category]" role="dimension" type="nominal" />
+            <column aggregation="Sum" datatype="real" name="[Sales]" role="measure" type="quantitative" />
+            <column caption="Profit Ratio" datatype="real" name="[Calculation_Profit Ratio]" role="measure" type="quantitative" />
+          </datasource-dependencies>
+          <filter class="categorical" column="[Category]" />
+          <aggregation value="true" />
+        </view>
+        <!-- Example worksheet formatting. This is where view-level visual styling such as mark color or axis text often lives. -->
+        <!-- Example dashboard-level formatting. -->
+      <style>
+          <style-rule element="mark">
+            <format attr="color" value="#4E79A7" />
+          </style-rule>
+          <style-rule element="axis-title">
+            <format attr="font-size" value="10" />
+            <format attr="font-weight" value="bold" />
+          </style-rule>
+        </style>
+        <!-- Example pane/mark definition. This is where the viz type, encodings, and tooltip behavior are defined. -->
+        <panes>
+          <pane selection-relaxation-option="selection-relaxation-allow">
+            <mark class="Bar" />
+            <encodings>
+              <color column="[Category]" />
+              <size column="[Sales]" />
+              <text column="[Sales]" />
+            </encodings>
+            <customized-tooltip value="Category: &lt;Category&gt; | Sales: &lt;Sales&gt;" />
+          </pane>
+        </panes>
+        <!-- Example shelf layout: rows encodes the discrete field placed on the Rows shelf. -->
+        <rows>[example.main].[none:Category:nk]</rows>
+        <!-- Example shelf layout: cols encodes the aggregated measure placed on the Columns shelf. -->
+        <cols>[example.main].[sum:Sales:qk]</cols>
+      </table>
+      <simple-id uuid="{11111111-1111-1111-1111-111111111111}" />
+    </worksheet>
+  </worksheets>
+  <dashboards>
+    <!-- Example dashboard. This section composes worksheets and controls into a final layout. -->
+    <dashboard enable-sort-zone-taborder="true" name="Example Dashboard">
+      <style>
+        <style-rule element="dashboard">
+          <format attr="background-color" value="#FFFFFF" />
+        </style-rule>
+      </style>
+      <size maxheight="900" maxwidth="1400" minheight="600" minwidth="900" sizing-mode="fixed" />
+      <datasources>
+        <datasource caption="example_fact_table" name="example.main" />
+        <datasource name="Parameters" />
+      </datasources>
+      <datasource-dependencies datasource="Parameters">
+        <column datatype="date" name="[Start Date]" role="measure" type="quantitative" />
+      </datasource-dependencies>
+      <!-- Example dashboard layout tree. Each zone represents a placed object or container. -->
+      <zones>
+        <!-- Example layout container zone that holds child objects. -->
+        <zone h="100000" id="1" type_v2="layout-basic" w="100000" x="0" y="0">
+          <!-- Example worksheet zone: places a sheet on the dashboard canvas. -->
+          <zone h="90000" id="2" name="Example Sheet" type_v2="sheet" w="100000" x="0" y="0" />
+          <!-- Example parameter-control zone: places a parameter control on the dashboard. -->
+          <zone h="10000" id="3" name="Start Date" param="[Start Date]" type_v2="parameter" w="25000" x="0" y="90000" />
+        </zone>
+      </zones>
+      <simple-id uuid="{22222222-2222-2222-2222-222222222222}" />
+    </dashboard>
+  </dashboards>
+  <!-- Example window metadata. This is workbook UI state, not field logic. -->
+  <windows>
+    <window class="worksheet" name="Example Sheet" />
+  </windows>
+  <!-- Example placeholder sections retained for workbook completeness. -->
+  <datagraph />
+  <thumbnails />
+  <external />
+</workbook>
