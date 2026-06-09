@@ -33,14 +33,8 @@ function sanitizeConnections(doc: Document): number {
   return updates;
 }
 
-function main(): void {
-  const [, , inputPath, outputPath] = process.argv;
-  if (!inputPath || !outputPath) {
-    console.error('Usage: node dist/src/strip-data.js <input.twb> <output.twb>');
-    process.exit(1);
-  }
+export function stripAndSanitize(doc: Document): any {
 
-  const doc = readXml(inputPath);
   const removed = {
     repositoryLocation: removeNodes(selectAll<Node>(doc, '//repository-location')),
     metadataRecords: removeNodes(selectAll<Node>(doc, '//metadata-records')),
@@ -50,10 +44,8 @@ function main(): void {
     connectionCustomizations: removeNodes(selectAll<Node>(doc, '//connection-customization')),
   };
   const sanitizedConnections = sanitizeConnections(doc);
-
-  writeXml(outputPath, doc);
-  console.log(`Stripped workbook written to ${path.resolve(outputPath)}`);
-  console.log(JSON.stringify({ removed, sanitizedConnections }, null, 2));
+  return sanitizedConnections;
 }
 
-main();
+function main(): void {
+}

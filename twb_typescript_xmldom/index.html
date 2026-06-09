@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TWB Toolchain</title>
+  <style>
+    /* ── Reset ──────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Tokens ─────────────────────────────────────────────────────────── */
+    :root {
+      --bg:         #0f1117;
+      --surface:    #181c27;
+      --surface-2:  #1f2433;
+      --border:     #2a3045;
+      --border-hi:  #3a4560;
+      --accent:     #df6436;
+      --accent-dim: rgba(223,100,54,.15);
+      --accent-glow:rgba(223,100,54,.35);
+      --text:       #e8eaf0;
+      --text-muted: #7a8299;
+      --text-dim:   #4a526a;
+      --success:    #4caf7d;
+      --error:      #e05252;
+      --mono:       "SF Mono", "Fira Code", "Cascadia Code", "Consolas", monospace;
+      --sans:       -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      --radius:     4px;
+      --transition: 160ms ease;
+    }
+
+    /* ── Base ───────────────────────────────────────────────────────────── */
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Layout ─────────────────────────────────────────────────────────── */
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────────── */
+    .header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      height: 56px;
+      background: var(--surface);
+    }
+
+    .wordmark {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .04em;
+      color: var(--text);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .wordmark-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    /* ── Tab bar ────────────────────────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      gap: 0;
+      margin-left: 16px;
+      height: 100%;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      height: 100%;
+      letter-spacing: .02em;
+      padding: 0 18px;
+      transition: color var(--transition), border-color var(--transition);
+      position: relative;
+      top: 1px; /* sit on the header border */
+    }
+
+    .tab-btn:hover { color: var(--text); }
+
+    .tab-btn.active {
+      color: var(--text);
+      border-bottom-color: var(--accent);
+    }
+
+    /* ── Main content ───────────────────────────────────────────────────── */
+    .main {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 48px 24px;
+    }
+
+    .panel {
+      display: none;
+      width: 100%;
+      max-width: 560px;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .panel.active { display: flex; }
+
+    /* ── Panel header ───────────────────────────────────────────────────── */
+    .panel-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -.01em;
+    }
+
+    .panel-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.65;
+    }
+
+    /* ── Field group ────────────────────────────────────────────────────── */
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ── File drop zone ─────────────────────────────────────────────────── */
+    .file-zone {
+      position: relative;
+      border: 1.5px dashed var(--border-hi);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      transition:
+        border-color var(--transition),
+        background var(--transition),
+        box-shadow var(--transition);
+      outline: none;
+    }
+
+    .file-zone:hover,
+    .file-zone:focus-within {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .file-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .file-zone.has-file {
+      border-style: solid;
+      border-color: var(--border-hi);
+      background: var(--surface-2);
+    }
+
+    .file-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .file-zone-inner {
+      pointer-events: none;
+      padding: 24px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .file-icon {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition), border-color var(--transition);
+    }
+
+    .file-zone.drag-over .file-icon,
+    .file-zone:hover .file-icon {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+    }
+
+    .file-zone.has-file .file-icon {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+    }
+
+    .file-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--text-muted);
+      transition: stroke var(--transition);
+    }
+
+    .file-zone.has-file .file-icon svg,
+    .file-zone.drag-over .file-icon svg,
+    .file-zone:hover .file-icon svg { stroke: var(--accent); }
+
+    .file-zone-text { flex: 1; min-width: 0; }
+
+    .file-zone-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .file-zone-prompt {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .file-zone-name {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .file-zone-clear {
+      flex-shrink: 0;
+      background: none;
+      border: 1px solid var(--border-hi);
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      padding: 3px 8px;
+      pointer-events: auto;
+      transition: color var(--transition), border-color var(--transition);
+      display: none;
+    }
+
+    .file-zone-clear:hover { color: var(--error); border-color: var(--error); }
+    .file-zone.has-file .file-zone-clear { display: block; }
+
+    /* ── Submit button ──────────────────────────────────────────────────── */
+    .submit-wrap {
+      overflow: hidden;
+      /* slide-down reveal */
+      max-height: 0;
+      opacity: 0;
+      transition:
+        max-height 240ms cubic-bezier(.4,0,.2,1),
+        opacity 200ms ease;
+    }
+
+    .submit-wrap.visible {
+      max-height: 72px;
+      opacity: 1;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      color: #fff;
+      cursor: pointer;
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 600;
+      height: 44px;
+      letter-spacing: .02em;
+      transition:
+        background var(--transition),
+        opacity var(--transition),
+        transform 80ms ease;
+    }
+
+    .btn-submit:hover  { background: #e8743f; }
+    .btn-submit:active { transform: scale(.99); }
+
+    .btn-submit:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-submit.loading {
+      position: relative;
+      color: transparent;
+    }
+
+    .btn-submit.loading::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 650ms linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Status bar ─────────────────────────────────────────────────────── */
+    .status {
+      display: none;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      border: 1px solid transparent;
+    }
+
+    .status.visible { display: flex; }
+
+    .status.success {
+      background: rgba(76,175,125,.1);
+      border-color: rgba(76,175,125,.3);
+      color: var(--success);
+    }
+
+    .status.error {
+      background: rgba(224,82,82,.1);
+      border-color: rgba(224,82,82,.3);
+      color: var(--error);
+    }
+
+    .status-icon { flex-shrink: 0; margin-top: 1px; }
+
+    .status-text { flex: 1; line-height: 1.5; }
+
+    .status-filename {
+      font-family: var(--mono);
+      font-size: 12px;
+      opacity: .8;
+      margin-top: 2px;
+      display: block;
+    }
+
+    /* ── Divider ────────────────────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Reduced motion ─────────────────────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 1ms !important; animation-duration: 1ms !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="wordmark">
+      <span class="wordmark-dot"></span>
+      TWB Toolchain
+    </div>
+    <div class="divider" style="width:1px;height:24px;background:var(--border);flex-shrink:0"></div>
+    <nav class="tabs" role="tablist">
+      <button class="tab-btn active" role="tab" aria-selected="true"  aria-controls="panel-extract" id="tab-extract">Extract Config</button>
+      <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="panel-patch"   id="tab-patch">Patch</button>
+      <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="panel-strip"   id="tab-strip">Strip Data</button>
+    </nav>
+  </header>
+
+  <!-- Content -->
+  <main class="main">
+
+    <!-- ── Tab 1: Extract Config ── -->
+    <section class="panel active" id="panel-extract" role="tabpanel" aria-labelledby="tab-extract">
+      <div>
+        <h1 class="panel-title">Extract Config</h1>
+        <p class="panel-desc">Select a Tableau workbook (.twb) to extract its configuration. The workbook type is detected automatically and the config is downloaded as JSON.</p>
+      </div>
+
+      <div class="field-group">
+        <div class="file-zone" id="zone-extract-twb" tabindex="0">
+          <input type="file" accept=".twb" id="input-extract-twb" aria-label="Select workbook file" />
+          <div class="file-zone-inner">
+            <div class="file-icon">
+              <!-- Document icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </div>
+            <div class="file-zone-text">
+              <div class="file-zone-label">Workbook</div>
+              <div class="file-zone-prompt" id="prompt-extract-twb">Drop a .twb file here, or click to browse</div>
+              <div class="file-zone-name" id="name-extract-twb" style="display:none"></div>
+            </div>
+            <button class="file-zone-clear" id="clear-extract-twb" type="button" aria-label="Remove file">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="submit-wrap" id="submit-wrap-extract">
+        <button class="btn-submit" id="btn-extract" type="button">Extract Config</button>
+      </div>
+
+      <div class="status" id="status-extract" role="status" aria-live="polite"></div>
+    </section>
+
+    <!-- ── Tab 2: Patch ── -->
+    <section class="panel" id="panel-patch" role="tabpanel" aria-labelledby="tab-patch">
+      <div>
+        <h1 class="panel-title">Patch Workbook</h1>
+        <p class="panel-desc">Apply a config file to a workbook template. Upload the JSON config and the target .twb, then download the patched workbook.</p>
+      </div>
+
+      <div class="field-group">
+        <div class="file-zone" id="zone-patch-config" tabindex="0">
+          <input type="file" accept=".json" id="input-patch-config" aria-label="Select config JSON file" />
+          <div class="file-zone-inner">
+            <div class="file-icon">
+              <!-- Braces icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"/>
+                <path d="M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1"/>
+              </svg>
+            </div>
+            <div class="file-zone-text">
+              <div class="file-zone-label">Config</div>
+              <div class="file-zone-prompt" id="prompt-patch-config">Drop a .json config file here, or click to browse</div>
+              <div class="file-zone-name" id="name-patch-config" style="display:none"></div>
+            </div>
+            <button class="file-zone-clear" id="clear-patch-config" type="button" aria-label="Remove file">Clear</button>
+          </div>
+        </div>
+
+        <div class="file-zone" id="zone-patch-twb" tabindex="0">
+          <input type="file" accept=".twb" id="input-patch-twb" aria-label="Select workbook template file" />
+          <div class="file-zone-inner">
+            <div class="file-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </div>
+            <div class="file-zone-text">
+              <div class="file-zone-label">Workbook</div>
+              <div class="file-zone-prompt" id="prompt-patch-twb">Drop a .twb template here, or click to browse</div>
+              <div class="file-zone-name" id="name-patch-twb" style="display:none"></div>
+            </div>
+            <button class="file-zone-clear" id="clear-patch-twb" type="button" aria-label="Remove file">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="submit-wrap" id="submit-wrap-patch">
+        <button class="btn-submit" id="btn-patch" type="button">Patch Workbook</button>
+      </div>
+
+      <div class="status" id="status-patch" role="status" aria-live="polite"></div>
+    </section>
+
+    <!-- ── Tab 3: Strip Data ── -->
+    <section class="panel" id="panel-strip" role="tabpanel" aria-labelledby="tab-strip">
+      <div>
+        <h1 class="panel-title">Strip Data</h1>
+        <p class="panel-desc">Remove embedded data, metadata records, and sensitive connection credentials from a workbook before sharing it.</p>
+      </div>
+
+      <div class="field-group">
+        <div class="file-zone" id="zone-strip-twb" tabindex="0">
+          <input type="file" accept=".twb" id="input-strip-twb" aria-label="Select workbook file" />
+          <div class="file-zone-inner">
+            <div class="file-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="9" y1="13" x2="15" y2="13"/>
+                <line x1="9" y1="17" x2="12" y2="17"/>
+              </svg>
+            </div>
+            <div class="file-zone-text">
+              <div class="file-zone-label">Workbook</div>
+              <div class="file-zone-prompt" id="prompt-strip-twb">Drop a .twb file here, or click to browse</div>
+              <div class="file-zone-name" id="name-strip-twb" style="display:none"></div>
+            </div>
+            <button class="file-zone-clear" id="clear-strip-twb" type="button" aria-label="Remove file">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="submit-wrap" id="submit-wrap-strip">
+        <button class="btn-submit" id="btn-strip" type="button">Strip Data</button>
+      </div>
+
+      <div class="status" id="status-strip" role="status" aria-live="polite"></div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // ── Tab switching ─────────────────────────────────────────────────────────
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      document.getElementById(btn.getAttribute('aria-controls')).classList.add('active');
+    });
+  });
+
+  // ── File zone factory ─────────────────────────────────────────────────────
+  // Returns the currently selected File, or null.
+
+  function makeFileZone({ zoneId, inputId, promptId, nameId, clearId, onFileChange }) {
+    const zone   = document.getElementById(zoneId);
+    const input  = document.getElementById(inputId);
+    const prompt = document.getElementById(promptId);
+    const nameEl = document.getElementById(nameId);
+    const clearBtn = document.getElementById(clearId);
+    let currentFile = null;
+
+    function setFile(file) {
+      currentFile = file;
+      if (file) {
+        zone.classList.add('has-file');
+        prompt.style.display = 'none';
+        nameEl.style.display = 'block';
+        nameEl.textContent = file.name;
+      } else {
+        zone.classList.remove('has-file');
+        prompt.style.display = 'block';
+        nameEl.style.display = 'none';
+        nameEl.textContent = '';
+        input.value = '';
+      }
+      onFileChange(currentFile);
+    }
+
+    input.addEventListener('change', () => {
+      setFile(input.files[0] ?? null);
+    });
+
+    clearBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setFile(null);
+    });
+
+    // Drag and drop
+    zone.addEventListener('dragenter', (e) => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragover',  (e) => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', (e) => {
+      if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over');
+    });
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      const file = e.dataTransfer?.files[0] ?? null;
+      if (file) {
+        // Build a synthetic FileList-like entry on the input
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        setFile(file);
+      }
+    });
+
+    // Keyboard open
+    zone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); }
+    });
+
+    return { getFile: () => currentFile };
+  }
+
+  // ── Status helpers ────────────────────────────────────────────────────────
+
+  function showStatus(id, type, message, filename) {
+    const el = document.getElementById(id);
+    el.className = `status visible ${type}`;
+
+    const icon = type === 'success'
+      ? `<svg class="status-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+      : `<svg class="status-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+
+    el.innerHTML = `${icon}<div class="status-text">${message}${filename ? `<span class="status-filename">${filename}</span>` : ''}</div>`;
+  }
+
+  function clearStatus(id) {
+    const el = document.getElementById(id);
+    el.className = 'status';
+    el.innerHTML = '';
+  }
+
+  function setSubmitVisible(wrapId, visible) {
+    document.getElementById(wrapId).classList.toggle('visible', visible);
+  }
+
+  // ── Download helper ───────────────────────────────────────────────────────
+
+  async function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // ── Generic submit handler ────────────────────────────────────────────────
+
+  async function handleSubmit({ endpoint, formData, btnId, statusId, outputFilename }) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = true;
+    btn.classList.add('loading');
+    clearStatus(statusId);
+
+    try {
+      const response = await fetch(endpoint, { method: 'POST', body: formData });
+
+      if (!response.ok) {
+        let msg = `Server error ${response.status}`;
+        try { const j = await response.json(); msg = j.error ?? msg; } catch {}
+        throw new Error(msg);
+      }
+
+      // Detect filename from Content-Disposition header if available
+      const cd = response.headers.get('content-disposition') ?? '';
+      const match = cd.match(/filename[^;=\n]*=(["']?)([^"'\n]+)\1/);
+      const filename = match?.[2] ?? outputFilename;
+
+      const blob = await response.blob();
+      await downloadBlob(blob, filename);
+      showStatus(statusId, 'success', 'Download started.', filename);
+
+    } catch (err) {
+      showStatus(statusId, 'error', err.message ?? 'Something went wrong.');
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+    }
+  }
+
+  // ── Tab 1: Extract Config ─────────────────────────────────────────────────
+
+  const extractZone = makeFileZone({
+    zoneId:   'zone-extract-twb',
+    inputId:  'input-extract-twb',
+    promptId: 'prompt-extract-twb',
+    nameId:   'name-extract-twb',
+    clearId:  'clear-extract-twb',
+    onFileChange: (file) => {
+      setSubmitVisible('submit-wrap-extract', !!file);
+      if (!file) clearStatus('status-extract');
+    },
+  });
+
+  document.getElementById('btn-extract').addEventListener('click', () => {
+    const file = extractZone.getFile();
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('twb', file);
+    const base = file.name.replace(/\.twb$/i, '');
+    handleSubmit({
+      endpoint: '/api/extract',
+      formData,
+      btnId: 'btn-extract',
+      statusId: 'status-extract',
+      outputFilename: `${base}_config.json`,
+    });
+  });
+
+  // ── Tab 2: Patch ──────────────────────────────────────────────────────────
+
+  let patchConfigFile = null;
+  let patchTwbFile    = null;
+
+  function checkPatchReady() {
+    setSubmitVisible('submit-wrap-patch', !!(patchConfigFile && patchTwbFile));
+    if (!patchConfigFile && !patchTwbFile) clearStatus('status-patch');
+  }
+
+  const patchConfigZone = makeFileZone({
+    zoneId:   'zone-patch-config',
+    inputId:  'input-patch-config',
+    promptId: 'prompt-patch-config',
+    nameId:   'name-patch-config',
+    clearId:  'clear-patch-config',
+    onFileChange: (file) => { patchConfigFile = file; checkPatchReady(); },
+  });
+
+  const patchTwbZone = makeFileZone({
+    zoneId:   'zone-patch-twb',
+    inputId:  'input-patch-twb',
+    promptId: 'prompt-patch-twb',
+    nameId:   'name-patch-twb',
+    clearId:  'clear-patch-twb',
+    onFileChange: (file) => { patchTwbFile = file; checkPatchReady(); },
+  });
+
+  document.getElementById('btn-patch').addEventListener('click', () => {
+    const config = patchConfigZone.getFile();
+    const twb    = patchTwbZone.getFile();
+    if (!config || !twb) return;
+    const formData = new FormData();
+    formData.append('config', config);
+    formData.append('twb', twb);
+    const base = twb.name.replace(/\.twb$/i, '');
+    handleSubmit({
+      endpoint: '/api/patch',
+      formData,
+      btnId: 'btn-patch',
+      statusId: 'status-patch',
+      outputFilename: `${base}_patched.twb`,
+    });
+  });
+
+  // ── Tab 3: Strip Data ─────────────────────────────────────────────────────
+
+  const stripZone = makeFileZone({
+    zoneId:   'zone-strip-twb',
+    inputId:  'input-strip-twb',
+    promptId: 'prompt-strip-twb',
+    nameId:   'name-strip-twb',
+    clearId:  'clear-strip-twb',
+    onFileChange: (file) => {
+      setSubmitVisible('submit-wrap-strip', !!file);
+      if (!file) clearStatus('status-strip');
+    },
+  });
+
+  document.getElementById('btn-strip').addEventListener('click', () => {
+    const file = stripZone.getFile();
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('twb', file);
+    const base = file.name.replace(/\.twb$/i, '');
+    handleSubmit({
+      endpoint: '/api/strip',
+      formData,
+      btnId: 'btn-strip',
+      statusId: 'status-strip',
+      outputFilename: `${base}_stripped.twb`,
+    });
+  });
+</script>
+</body>
+</html>

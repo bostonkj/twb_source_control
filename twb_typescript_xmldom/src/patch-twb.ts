@@ -238,24 +238,12 @@ function applyPatch(doc: Document, config: Config): WorkbookName {
 
 // ─── CLI entrypoint ───────────────────────────────────────────────────────────
 
-function main(): void {
-  const [, , configPath, templatePath, outputPath] = process.argv;
-  if (!configPath || !templatePath || !outputPath) {
-    console.error(
-      'Usage: node dist/src/patch-twb.js <config.(json|yaml)> <template.twb> <output.twb>'
-    );
-    process.exit(1);
-  }
-
-  const config = loadConfig(configPath);
+export function patchWorkbook(doc: Document, config: Config): any {
   validateConfig(config);
-  const doc = readXml(templatePath);
-
   const workbook = applyPatch(doc, config);
-
-  writeXml(outputPath, doc);
-  console.log(`Patched workbook written to ${path.resolve(outputPath)}`);
-  console.log(`Workbook type: ${workbook}`);
+  return workbook;
 }
 
-main();
+function main(): void {
+
+}
