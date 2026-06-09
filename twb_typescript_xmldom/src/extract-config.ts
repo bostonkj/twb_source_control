@@ -228,18 +228,5 @@ export function extractConfig(doc: Document): WorkbookConfig {
 // ─── CLI entrypoint ───────────────────────────────────────────────────────────
 
 function main(): void {
-  const [, , inputPath, outputPath] = process.argv;
-  if (!inputPath || !outputPath) {
-    console.error('Usage: node dist/src/extract-config.js <input.twb> <output.json>');
-    process.exit(1);
-  }
-
-  const doc = readXml(inputPath);
-  const config = extractConfig(doc);
-
-  fs.writeFileSync(outputPath, JSON.stringify(config, null, 2) + '', 'utf8');
-  console.log(`Extracted config written to ${path.resolve(outputPath)}`);
-  console.log(`Workbook detected: ${config.workbook}`);
 }
 
-main();
