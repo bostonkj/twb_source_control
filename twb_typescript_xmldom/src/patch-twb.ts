@@ -2,8 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import yaml from 'js-yaml';
 import { ensureElement, readXml, selectAll, selectOne, writeXml } from './xml.js';
+import { type WorkbookName, detectWorkbook } from './extract-config.js';
+
+// ─── Config type ──────────────────────────────────────────────────────────────
+
+type ColorPalette = { name: string; type: string; colors: string[] };
 
 type Config = {
+  workbook?: WorkbookName;
   datasources?: Array<{
     name_in_workbook: string;
     project_path?: string;
@@ -14,9 +20,12 @@ type Config = {
     default_value?: string;
   }>;
   parameter_calcs?: Record<string, Record<string, string>>;
+  calculated_fields?: Record<string, string>;
+  color_palettes?: ColorPalette[];
 };
 
-// Loads either a JSON or YAML config file from disk.
+// ─── Config loader ────────────────────────────────────────────────────────────
+
 function loadConfig(filePath: string): Config {
   const raw = fs.readFileSync(filePath, 'utf8');
   if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
@@ -25,22 +34,23 @@ function loadConfig(filePath: string): Config {
   return JSON.parse(raw) as Config;
 }
 
-// Escapes a string so it can be safely injected into an XPath literal.
+// ─── Shared utilities ─────────────────────────────────────────────────────────
+
+// Escapes a string so it can be safely injected into an XPath expression.
 function xpathLiteral(value: string): string {
   if (!value.includes('"')) return `"${value}"`;
   if (!value.includes("'")) return `'${value}'`;
-
   const parts = value.split('"').flatMap((part, index, arr) => {
     const out: string[] = [];
     if (part) out.push(`"${part}"`);
     if (index < arr.length - 1) out.push(`'"'`);
     return out;
   });
-
   return `concat(${parts.join(', ')})`;
 }
 
-// Updates repository-location path values for configured datasources.
+// ─── Shared patch operations ──────────────────────────────────────────────────
+
 function updateDatasourcePaths(doc: Document, config: Config): void {
   for (const ds of config.datasources ?? []) {
     const lit = xpathLiteral(ds.name_in_workbook);
@@ -54,7 +64,6 @@ function updateDatasourcePaths(doc: Document, config: Config): void {
   }
 }
 
-// Rewrites simple renamed-field calculations so captions point at the configured source fields.
 function updateRenamedFields(doc: Document, config: Config): void {
   for (const [friendlyName, targetField] of Object.entries(config.renamed_fields ?? {})) {
     const lit = xpathLiteral(friendlyName);
@@ -69,7 +78,6 @@ function updateRenamedFields(doc: Document, config: Config): void {
   }
 }
 
-// Replaces a parameter domain with a new ordered list of member values.
 function replaceDomainValues(doc: Document, column: Element, values: string[]): void {
   const domain = selectOne<Element>(column, './/domain');
   if (!domain) return;
@@ -82,7 +90,6 @@ function replaceDomainValues(doc: Document, column: Element, values: string[]): 
   }
 }
 
-// Applies parameter member-list and default-value updates from config.
 function updateParameters(doc: Document, config: Config): void {
   for (const [parameterName, param] of Object.entries(config.parameters ?? {})) {
     const lit = xpathLiteral(parameterName);
@@ -96,7 +103,6 @@ function updateParameters(doc: Document, config: Config): void {
   }
 }
 
-// Builds a Tableau CASE formula from a label-to-expression mapping.
 function buildCaseFormula(parameterName: string, mapping: Record<string, string>): string {
   const parts = [`CASE [Parameters].[${parameterName}]`];
   for (const [label, expr] of Object.entries(mapping)) {
@@ -106,7 +112,6 @@ function buildCaseFormula(parameterName: string, mapping: Record<string, string>
   return parts.join(' ');
 }
 
-// Rewrites parameter-driven calculated fields using config-provided CASE mappings.
 function updateParameterCalcs(doc: Document, config: Config): void {
   for (const [calcName, mapping] of Object.entries(config.parameter_calcs ?? {})) {
     const lit = xpathLiteral(calcName);
@@ -120,19 +125,125 @@ function updateParameterCalcs(doc: Document, config: Config): void {
   }
 }
 
-// Validates a few config invariants before the workbook is modified.
-function validateConfig(config: Config): void {
-  for (const [name, param] of Object.entries(config.parameters ?? {})) {
-    if (param.default_value && param.allowed_values?.length && !param.allowed_values.includes(param.default_value)) {
-      throw new Error(`Default value ${param.default_value} is not in allowed_values for ${name}`);
+// Updates non-trivial calculated field formulas.
+function updateCalculatedFields(doc: Document, config: Config): void {
+  for (const [fieldName, formula] of Object.entries(config.calculated_fields ?? {})) {
+    const lit = xpathLiteral(fieldName);
+    const column = selectOne<Element>(
+      doc,
+      `//column[@caption=${lit} or @name=concat('[', ${lit}, ']')]`
+    );
+    if (!column) continue;
+    const calc = ensureElement(doc, column, 'calculation');
+    calc.setAttribute('formula', formula);
+  }
+}
+
+// Replaces color palette hex values in the workbook preferences block.
+// Only updates palettes that already exist in the template; does not create new ones.
+function updateColorPalettes(doc: Document, config: Config): void {
+  for (const palette of config.color_palettes ?? []) {
+    const lit = xpathLiteral(palette.name);
+    const paletteEl = selectOne<Element>(
+      doc,
+      `//preferences/color-palette[@name=${lit}]`
+    );
+    if (!paletteEl) continue;
+
+    // Replace all <color> children
+    const existingColors = selectAll<Element>(paletteEl, './color');
+    for (const c of existingColors) {
+      paletteEl.removeChild(c);
+    }
+    for (const hex of palette.colors) {
+      const colorEl = doc.createElement('color');
+      colorEl.textContent = hex;
+      paletteEl.appendChild(colorEl);
     }
   }
 }
 
+// ─── Validation ───────────────────────────────────────────────────────────────
+
+function validateConfig(config: Config): void {
+  for (const [name, param] of Object.entries(config.parameters ?? {})) {
+    if (
+      param.default_value &&
+      param.allowed_values?.length &&
+      !param.allowed_values.includes(param.default_value)
+    ) {
+      throw new Error(
+        `Default value "${param.default_value}" is not in allowed_values for parameter "${name}"`
+      );
+    }
+  }
+}
+
+// ─── Workbook-specific patch dispatchers ─────────────────────────────────────
+
+// Applies the full patch suite for all workbooks. Each workbook type shares
+// the same operations; add workbook-specific overrides inside these functions
+// if divergence is needed in future.
+
+function patchDailyDiagnostics(doc: Document, config: Config): void {
+  updateDatasourcePaths(doc, config);
+  updateRenamedFields(doc, config);
+  updateParameters(doc, config);
+  updateParameterCalcs(doc, config);
+  updateCalculatedFields(doc, config);
+  updateColorPalettes(doc, config);
+}
+
+function patchExecutiveSummary(doc: Document, config: Config): void {
+  updateDatasourcePaths(doc, config);
+  updateRenamedFields(doc, config);
+  updateParameters(doc, config);
+  updateParameterCalcs(doc, config);
+  updateCalculatedFields(doc, config);
+  updateColorPalettes(doc, config);
+}
+
+function patchWeeklyCrossChannel(doc: Document, config: Config): void {
+  updateDatasourcePaths(doc, config);
+  updateRenamedFields(doc, config);
+  updateParameters(doc, config);
+  updateParameterCalcs(doc, config);
+  updateCalculatedFields(doc, config);
+  updateColorPalettes(doc, config);
+}
+
+// ─── Router ───────────────────────────────────────────────────────────────────
+
+function applyPatch(doc: Document, config: Config): WorkbookName {
+  // Prefer the workbook declared in the config, but fall back to detecting
+  // it from the template's sheet names so configs without the field still work.
+  const workbook: WorkbookName = config.workbook ?? detectWorkbook(doc);
+
+  switch (workbook) {
+    case 'daily_diagnostics':
+      patchDailyDiagnostics(doc, config);
+      break;
+    case 'executive_summary':
+      patchExecutiveSummary(doc, config);
+      break;
+    case 'weekly_cross_channel':
+      patchWeeklyCrossChannel(doc, config);
+      break;
+    default:
+      throw new Error(`Unknown workbook type: "${workbook}"`);
+  }
+
+  return workbook;
+}
+
+// ─── CLI entrypoint ───────────────────────────────────────────────────────────
+
 function main(): void {
   const [, , configPath, templatePath, outputPath] = process.argv;
   if (!configPath || !templatePath || !outputPath) {
-    console.error('Usage: node dist/src/patch-twb.js <config.(json|yaml)> <template.twb> <output.twb>');
+    console.error(
+      'Usage: node dist/src/patch-twb.js <config.(json|yaml)> <template.twb> <output.twb>'
+    );
     process.exit(1);
   }
 
@@ -140,13 +251,11 @@ function main(): void {
   validateConfig(config);
   const doc = readXml(templatePath);
 
-  updateDatasourcePaths(doc, config);
-  updateRenamedFields(doc, config);
-  updateParameters(doc, config);
-  updateParameterCalcs(doc, config);
+  const workbook = applyPatch(doc, config);
 
   writeXml(outputPath, doc);
   console.log(`Patched workbook written to ${path.resolve(outputPath)}`);
+  console.log(`Workbook type: ${workbook}`);
 }
 
 main();
