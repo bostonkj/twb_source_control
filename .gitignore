@@ -1,2 +1,9 @@
 presentation/.presentation_notes.md
 .DS_Store
+node_modules/
+dist/
+*.log
+*.zip
+configs/
+output/
+workbooks/
