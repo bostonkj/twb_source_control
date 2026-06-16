@@ -387,6 +387,294 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { transition-duration: 1ms !important; animation-duration: 1ms !important; }
     }
+
+    /* ── Build Config tab ────────────────────────────────────────────────── */
+
+    .build-panel { max-width: 760px; }
+
+    .build-control-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .build-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .select-wrapper { position: relative; flex: 1; }
+
+    .build-select {
+      width: 100%;
+      appearance: none;
+      background: var(--surface);
+      border: 1px solid var(--border-hi);
+      border-radius: var(--radius);
+      color: var(--text);
+      cursor: pointer;
+      font-family: var(--sans);
+      font-size: 13px;
+      height: 36px;
+      padding: 0 32px 0 12px;
+      transition: border-color var(--transition);
+    }
+
+    .build-select option { background: var(--surface-2); }
+    .build-select:hover  { border-color: var(--accent); }
+    .build-select:focus  { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+
+    .select-wrapper::after {
+      content: '';
+      pointer-events: none;
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-60%);
+      width: 0; height: 0;
+      border: 4px solid transparent;
+      border-top-color: var(--text-muted);
+    }
+
+    #build-form {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .build-section {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .build-section-head {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .build-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .build-section-desc {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .build-list { background: var(--surface-2); }
+
+    .build-empty {
+      padding: 12px 16px;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* Renamed fields */
+    .renamed-row {
+      display: grid;
+      grid-template-columns: 1fr 18px 1fr;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 16px;
+      transition: background var(--transition);
+    }
+
+    .renamed-row:hover { background: rgba(255,255,255,.025); }
+
+    .renamed-source {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .renamed-arrow {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    .renamed-input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 12px;
+      height: 26px;
+      padding: 0 8px;
+      width: 100%;
+      transition: border-color var(--transition);
+    }
+
+    .renamed-input:hover:not(:focus) { border-color: var(--border-hi); }
+    .renamed-input:focus { outline: none; border-color: var(--accent); }
+
+    /* KPI groups */
+    .kpi-group {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .kpi-group:last-child { border-bottom: none; }
+
+    .kpi-group-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .kpi-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .kpi-variants {
+      font-size: 11px;
+      color: var(--text-dim);
+      flex: 1;
+    }
+
+    .kpi-toggle-all {
+      background: none;
+      border: 1px solid var(--border-hi);
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      padding: 2px 8px;
+      transition: color var(--transition), border-color var(--transition);
+    }
+
+    .kpi-toggle-all:hover { color: var(--text); border-color: var(--accent); }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 2px 8px;
+    }
+
+    .metric-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+
+    .metric-item:hover { background: rgba(255,255,255,.04); }
+
+    .metric-item input[type="checkbox"] {
+      appearance: none;
+      flex-shrink: 0;
+      width: 14px;
+      height: 14px;
+      border: 1px solid var(--border-hi);
+      border-radius: 3px;
+      background: var(--surface);
+      cursor: pointer;
+      position: relative;
+      transition: background var(--transition), border-color var(--transition);
+    }
+
+    .metric-item input[type="checkbox"]:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .metric-item input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 0;
+      width: 5px;
+      height: 9px;
+      border: 1.5px solid #fff;
+      border-left: none;
+      border-top: none;
+      transform: rotate(45deg);
+    }
+
+    .metric-name {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .metric-item:has(input:checked) .metric-name { color: var(--text); }
+
+    /* Dimension mapping */
+    .dim-shared-note {
+      padding: 7px 16px;
+      font-size: 11px;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .dim-calc-name {
+      padding: 7px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .dim-row {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 16px;
+      transition: background var(--transition);
+    }
+
+    .dim-row:hover { background: rgba(255,255,255,.025); }
+
+    .dim-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .dim-input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 11px;
+      height: 26px;
+      padding: 0 8px;
+      width: 100%;
+      transition: border-color var(--transition);
+    }
+
+    .dim-input:hover:not(:focus) { border-color: var(--border-hi); }
+    .dim-input:focus { outline: none; border-color: var(--accent); }
   </style>
 </head>
 <body>
@@ -403,6 +691,7 @@
       <button class="tab-btn active" role="tab" aria-selected="true"  aria-controls="panel-extract" id="tab-extract">Extract Config</button>
       <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="panel-patch"   id="tab-patch">Patch</button>
       <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="panel-strip"   id="tab-strip">Strip Data</button>
+      <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="panel-build"   id="tab-build">Build Config</button>
     </nav>
   </header>
 
@@ -531,6 +820,88 @@
       </div>
 
       <div class="status" id="status-strip" role="status" aria-live="polite"></div>
+    </section>
+
+    <!-- ── Tab 4: Build Config ── -->
+    <section class="panel build-panel" id="panel-build" role="tabpanel" aria-labelledby="tab-build">
+      <div>
+        <h1 class="panel-title">Build Config</h1>
+        <p class="panel-desc">Select a workbook type to fill in a config, or upload an existing config to auto-detect the type and pre-populate the form.</p>
+      </div>
+
+      <div class="field-group">
+
+        <!-- Workbook type selector -->
+        <div class="build-control-row">
+          <label class="build-label" for="build-type-select">Workbook</label>
+          <div class="select-wrapper">
+            <select class="build-select" id="build-type-select">
+              <option value="">— select workbook type —</option>
+              <option value="daily_diagnostics">Daily Diagnostics</option>
+              <option value="executive_summary">Executive Summary</option>
+              <option value="weekly_cross_channel">Weekly Cross Channel</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Optional config upload -->
+        <div class="file-zone" id="zone-build-json" tabindex="0">
+          <input type="file" accept=".json" id="input-build-json" aria-label="Upload existing config JSON" />
+          <div class="file-zone-inner">
+            <div class="file-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"/>
+                <path d="M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1"/>
+              </svg>
+            </div>
+            <div class="file-zone-text">
+              <div class="file-zone-label">Import Config (optional)</div>
+              <div class="file-zone-prompt" id="prompt-build-json">Drop a .json config to auto-detect type and pre-populate</div>
+              <div class="file-zone-name" id="name-build-json" style="display:none"></div>
+            </div>
+            <button class="file-zone-clear" id="clear-build-json" type="button" aria-label="Remove file">Clear</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Dynamic form — hidden until a workbook type is selected -->
+      <div id="build-form" style="display:none">
+
+        <!-- Renamed Fields -->
+        <div class="build-section">
+          <div class="build-section-head">
+            <div class="build-section-title">Renamed Fields</div>
+            <div class="build-section-desc">Source field name from Tableau (left) mapped to the display name shown in the workbook (right, editable).</div>
+          </div>
+          <div id="build-renamed-list" class="build-list"></div>
+        </div>
+
+        <!-- KPI Parameters -->
+        <div class="build-section" id="build-kpi-section">
+          <div class="build-section-head">
+            <div class="build-section-title">KPI Parameters</div>
+            <div class="build-section-desc">Check which metrics appear in each KPI selector. Related variants (LY, Previous Period, Plan) will mirror the same selection on export.</div>
+          </div>
+          <div id="build-kpi-list" class="build-list"></div>
+        </div>
+
+        <!-- Dimension Mapping -->
+        <div class="build-section" id="build-dim-section">
+          <div class="build-section-head">
+            <div class="build-section-title">Dimension Mapping</div>
+            <div class="build-section-desc">Map each dimension option to its Tableau field expression (e.g. <code style="font-family:var(--mono);font-size:11px">[Channel]</code> or <code style="font-family:var(--mono);font-size:11px">STR([Date])</code>).</div>
+          </div>
+          <div id="build-dim-list" class="build-list"></div>
+        </div>
+
+        <!-- Download -->
+        <div class="submit-wrap visible">
+          <button class="btn-submit" id="btn-build-download" type="button">Download Config JSON</button>
+        </div>
+        <div class="status" id="status-build" role="status" aria-live="polite"></div>
+
+      </div>
     </section>
 
   </main>
@@ -788,6 +1159,413 @@
       statusId: 'status-strip',
       outputFilename: `${base}_stripped.twb`,
     });
+  });
+
+  // ── Tab 4: Build Config ───────────────────────────────────────────────────────
+
+  const WORKBOOK_SCHEMAS = {
+    daily_diagnostics:    '/configs/mkuk_dd.json',
+    executive_summary:    '/configs/mkuk_es.json',
+    weekly_cross_channel: '/configs/mkuk_wcc.json',
+  };
+
+  // Suffixes / prefixes that mark a calc as a derived variant of a canonical one.
+  const VARIANT_SUFFIXES = [' LY', ' Previous Period', ' Label', ' Contribution'];
+  const VARIANT_PREFIXES = ['Plan ', '%-Str '];
+
+  // Live build state
+  let buildState = {
+    workbookType: null,
+    schema:       null,
+    kpiCalcs:     [],   // canonical KPI calc names (in order)
+    dimCalcs:     [],   // canonical dimension calc names
+    variantOf:    {},   // { canonicalName: [variantName, ...] }
+  };
+
+  // ── Utilities ─────────────────────────────────────────────────────────────────
+
+  /** HTML-escape a value for use in attribute values or text content. */
+  function esc(val) {
+    return String(val ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  /**
+   * Partition parameter_calcs into canonical KPI calcs, canonical dimension calcs,
+   * and a map from each canonical to its list of variant names.
+   */
+  function analyzeCalcs(parameterCalcs) {
+    const names   = Object.keys(parameterCalcs);
+    const nameSet = new Set(names);
+    const variantSet = new Set();
+    const variantOf  = {};
+
+    for (const name of names) {
+      let matched = false;
+      for (const suf of VARIANT_SUFFIXES) {
+        if (name.endsWith(suf)) {
+          const base = name.slice(0, -suf.length);
+          if (nameSet.has(base)) {
+            variantSet.add(name);
+            (variantOf[base] ??= []).push(name);
+            matched = true;
+            break;
+          }
+        }
+      }
+      if (!matched) {
+        for (const pre of VARIANT_PREFIXES) {
+          if (name.startsWith(pre)) {
+            const base = name.slice(pre.length);
+            if (nameSet.has(base)) {
+              variantSet.add(name);
+              (variantOf[base] ??= []).push(name);
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    const canonicals = names.filter(n => !variantSet.has(n));
+
+    // A calc is dimension-type if its option keys include 'Date' or its name contains 'Dimension'
+    const dimCalcs = canonicals.filter(n => {
+      const keys = Object.keys(parameterCalcs[n]);
+      return keys.includes('Date') || n.includes('Dimension');
+    });
+    const kpiCalcs = canonicals.filter(n => !dimCalcs.includes(n));
+
+    return { kpiCalcs, dimCalcs, variantOf };
+  }
+
+  // ── Schema loading ────────────────────────────────────────────────────────────
+
+  async function loadBuildSchema(workbookType) {
+    const url = WORKBOOK_SCHEMAS[workbookType];
+    if (!url) throw new Error(`Unknown workbook type: ${workbookType}`);
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`Could not load schema for ${workbookType} (${resp.status})`);
+    return resp.json();
+  }
+
+  async function loadAndRenderBuildForm(workbookType, importedConfig = null) {
+    clearStatus('status-build');
+    try {
+      const schema = await loadBuildSchema(workbookType);
+      const { kpiCalcs, dimCalcs, variantOf } = analyzeCalcs(schema.parameter_calcs ?? {});
+
+      buildState.workbookType = workbookType;
+      buildState.schema       = schema;
+      buildState.kpiCalcs     = kpiCalcs;
+      buildState.dimCalcs     = dimCalcs;
+      buildState.variantOf    = variantOf;
+
+      renderRenamedFields(schema.renamed_fields ?? {}, importedConfig?.renamed_fields ?? null);
+      renderKpiParams(kpiCalcs, variantOf, schema.parameter_calcs ?? {}, importedConfig?.parameter_calcs ?? null);
+      renderDimMapping(dimCalcs, schema.parameter_calcs ?? {}, importedConfig?.parameter_calcs ?? null);
+
+      document.getElementById('build-form').style.display = '';
+    } catch (err) {
+      showStatus('status-build', 'error', err.message ?? 'Failed to load workbook schema.');
+    }
+  }
+
+  // ── Render: Renamed Fields ────────────────────────────────────────────────────
+
+  function renderRenamedFields(templateFields, existingFields) {
+    const container = document.getElementById('build-renamed-list');
+    container.innerHTML = '';
+
+    const entries = Object.entries(templateFields);
+    if (!entries.length) {
+      container.innerHTML = '<div class="build-empty">No renamed fields for this workbook.</div>';
+      return;
+    }
+
+    // Build a reverse map: sourceField → friendlyName from imported config
+    const existingReverse = {};
+    if (existingFields) {
+      for (const [friendly, source] of Object.entries(existingFields)) {
+        existingReverse[source] = friendly;
+      }
+    }
+
+    for (const [defaultFriendly, sourceField] of entries) {
+      const friendlyName = existingReverse[sourceField] ?? defaultFriendly;
+      const row = document.createElement('div');
+      row.className = 'renamed-row';
+      row.innerHTML = `
+        <span class="renamed-source" title="${esc(sourceField)}">${esc(sourceField)}</span>
+        <span class="renamed-arrow">→</span>
+        <input class="renamed-input" type="text"
+               value="${esc(friendlyName)}"
+               data-source="${esc(sourceField)}"
+               placeholder="Display name" />
+      `;
+      container.appendChild(row);
+    }
+  }
+
+  // ── Render: KPI Parameters ────────────────────────────────────────────────────
+
+  function renderKpiParams(kpiCalcs, variantOf, parameterCalcs, existingCalcs) {
+    const section   = document.getElementById('build-kpi-section');
+    const container = document.getElementById('build-kpi-list');
+    container.innerHTML = '';
+
+    if (!kpiCalcs.length) {
+      section.style.display = 'none';
+      return;
+    }
+    section.style.display = '';
+
+    for (let ci = 0; ci < kpiCalcs.length; ci++) {
+      const calcName   = kpiCalcs[ci];
+      const metrics    = Object.keys(parameterCalcs[calcName] ?? {});
+      const existingKeys = existingCalcs?.[calcName]
+        ? new Set(Object.keys(existingCalcs[calcName]))
+        : null; // null = all checked by default
+      const variants = variantOf[calcName] ?? [];
+
+      const group = document.createElement('div');
+      group.className = 'kpi-group';
+
+      const variantHint = variants.length
+        ? `<span class="kpi-variants">Auto-applied to: ${esc(variants.join(', '))}</span>`
+        : '';
+
+      const checkboxes = metrics.map((m, mi) => {
+        const cbId    = `kpi-cb-${ci}-${mi}`;
+        const checked = existingKeys ? existingKeys.has(m) : true;
+        return `
+          <label class="metric-item" for="${esc(cbId)}">
+            <input type="checkbox" id="${esc(cbId)}"
+                   data-calc-idx="${ci}" data-metric-idx="${mi}"
+                   ${checked ? 'checked' : ''} />
+            <span class="metric-name" title="${esc(m)}">${esc(m)}</span>
+          </label>
+        `;
+      }).join('');
+
+      group.innerHTML = `
+        <div class="kpi-group-header">
+          <span class="kpi-name">${esc(calcName)}</span>
+          ${variantHint}
+          <button class="kpi-toggle-all" type="button" data-calc-idx="${ci}">Toggle All</button>
+        </div>
+        <div class="metric-grid">${checkboxes}</div>
+      `;
+      container.appendChild(group);
+    }
+  }
+
+  // One-time delegated listener for KPI "Toggle All" buttons
+  document.getElementById('build-kpi-list').addEventListener('click', e => {
+    const btn = e.target.closest('.kpi-toggle-all');
+    if (!btn) return;
+    const ci  = btn.dataset.calcIdx;
+    const cbs = document.querySelectorAll(`#build-kpi-list input[data-calc-idx="${ci}"]`);
+    const anyUnchecked = [...cbs].some(cb => !cb.checked);
+    cbs.forEach(cb => { cb.checked = anyUnchecked; });
+  });
+
+  // ── Render: Dimension Mapping ─────────────────────────────────────────────────
+
+  function renderDimMapping(dimCalcs, parameterCalcs, existingCalcs) {
+    const section   = document.getElementById('build-dim-section');
+    const container = document.getElementById('build-dim-list');
+    container.innerHTML = '';
+
+    if (!dimCalcs.length) {
+      section.style.display = 'none';
+      return;
+    }
+    section.style.display = '';
+
+    // If all dim calcs share the same option keys, show one shared mapping
+    const firstKeys   = Object.keys(parameterCalcs[dimCalcs[0]]).sort().join('\0');
+    const allSameKeys = dimCalcs.every(n =>
+      Object.keys(parameterCalcs[n]).sort().join('\0') === firstKeys
+    );
+
+    if (allSameKeys && dimCalcs.length > 1) {
+      // Shared mapping note
+      const note = document.createElement('div');
+      note.className = 'dim-shared-note';
+      note.textContent = `Applied to: ${dimCalcs.join(', ')}`;
+      container.appendChild(note);
+
+      const refMapping  = parameterCalcs[dimCalcs[0]];
+      const existingRef = existingCalcs?.[dimCalcs[0]];
+      // Encode all target calc names as a newline-delimited data attribute
+      const forCalcs    = dimCalcs.join('\n');
+
+      for (const [dimOption, formula] of Object.entries(refMapping)) {
+        const currentFormula = existingRef?.[dimOption] ?? formula;
+        const row = document.createElement('div');
+        row.className = 'dim-row';
+        row.innerHTML = `
+          <span class="dim-label">${esc(dimOption)}</span>
+          <input class="dim-input" type="text"
+                 value="${esc(currentFormula)}"
+                 data-dim="${esc(dimOption)}"
+                 data-for-calcs="${esc(forCalcs)}"
+                 placeholder="e.g. [Channel] or STR([Date])" />
+        `;
+        container.appendChild(row);
+      }
+    } else {
+      // Separate block per calc
+      for (const calcName of dimCalcs) {
+        const mapping  = parameterCalcs[calcName];
+        const existing = existingCalcs?.[calcName];
+
+        const head = document.createElement('div');
+        head.className = 'dim-calc-name';
+        head.textContent = calcName;
+        container.appendChild(head);
+
+        for (const [dimOption, formula] of Object.entries(mapping)) {
+          const currentFormula = existing?.[dimOption] ?? formula;
+          const row = document.createElement('div');
+          row.className = 'dim-row';
+          row.innerHTML = `
+            <span class="dim-label">${esc(dimOption)}</span>
+            <input class="dim-input" type="text"
+                   value="${esc(currentFormula)}"
+                   data-dim="${esc(dimOption)}"
+                   data-for-calcs="${esc(calcName)}"
+                   placeholder="e.g. [Channel]" />
+          `;
+          container.appendChild(row);
+        }
+      }
+    }
+  }
+
+  // ── Config export ─────────────────────────────────────────────────────────────
+
+  function exportBuildConfig() {
+    const { schema, workbookType, kpiCalcs, dimCalcs, variantOf } = buildState;
+    if (!schema) return null;
+
+    const config = {
+      workbook:          workbookType,
+      datasources:       schema.datasources       ?? [],
+      renamed_fields:    {},
+      parameters:        schema.parameters        ?? {},
+      parameter_calcs:   {},
+      calculated_fields: schema.calculated_fields ?? {},
+      color_palettes:    schema.color_palettes    ?? [],
+    };
+
+    // 1. Renamed fields
+    for (const input of document.querySelectorAll('#build-renamed-list .renamed-input')) {
+      const sourceField  = input.dataset.source;
+      const friendlyName = input.value.trim();
+      if (sourceField && friendlyName) {
+        config.renamed_fields[friendlyName] = sourceField;
+      }
+    }
+
+    // 2. KPI parameter_calcs — selected metrics only, auto-propagate to variants
+    for (let ci = 0; ci < kpiCalcs.length; ci++) {
+      const calcName = kpiCalcs[ci];
+      const metrics  = Object.keys(schema.parameter_calcs[calcName] ?? {});
+      const selected = {};
+
+      document.querySelectorAll(`#build-kpi-list input[data-calc-idx="${ci}"]`).forEach((cb, mi) => {
+        if (cb.checked && metrics[mi] !== undefined) {
+          selected[metrics[mi]] = schema.parameter_calcs[calcName][metrics[mi]];
+        }
+      });
+
+      config.parameter_calcs[calcName] = selected;
+
+      // Propagate selected metric keys to every variant, using the variant's own formulas
+      for (const variantName of (variantOf[calcName] ?? [])) {
+        const variantMapping = {};
+        for (const metricKey of Object.keys(selected)) {
+          const variantFormula = schema.parameter_calcs[variantName]?.[metricKey];
+          if (variantFormula !== undefined) {
+            variantMapping[metricKey] = variantFormula;
+          }
+        }
+        config.parameter_calcs[variantName] = variantMapping;
+      }
+    }
+
+    // 3. Dimension parameter_calcs
+    for (const input of document.querySelectorAll('#build-dim-list .dim-input')) {
+      const dimOption = input.dataset.dim;
+      const forCalcs  = input.dataset.forCalcs.split('\n').filter(Boolean);
+      for (const calcName of forCalcs) {
+        config.parameter_calcs[calcName] ??= {};
+        config.parameter_calcs[calcName][dimOption] = input.value.trim();
+      }
+    }
+
+    return config;
+  }
+
+  // ── Config import (file upload) ───────────────────────────────────────────────
+
+  const buildJsonZone = makeFileZone({
+    zoneId:   'zone-build-json',
+    inputId:  'input-build-json',
+    promptId: 'prompt-build-json',
+    nameId:   'name-build-json',
+    clearId:  'clear-build-json',
+    onFileChange: async (file) => {
+      if (!file) {
+        document.getElementById('build-form').style.display = 'none';
+        clearStatus('status-build');
+        return;
+      }
+      try {
+        const text     = await file.text();
+        const imported = JSON.parse(text);
+        const wbType   = imported.workbook;
+        if (!wbType || !WORKBOOK_SCHEMAS[wbType]) {
+          showStatus('status-build', 'error',
+            'Could not detect workbook type. Config must have a "workbook" field: daily_diagnostics, executive_summary, or weekly_cross_channel.');
+          return;
+        }
+        document.getElementById('build-type-select').value = wbType;
+        await loadAndRenderBuildForm(wbType, imported);
+      } catch (err) {
+        showStatus('status-build', 'error', 'Invalid JSON: ' + (err.message ?? 'Parse error'));
+      }
+    },
+  });
+
+  // Workbook type dropdown
+  document.getElementById('build-type-select').addEventListener('change', async (e) => {
+    const wbType = e.target.value;
+    if (!wbType) {
+      document.getElementById('build-form').style.display = 'none';
+      clearStatus('status-build');
+      buildState.schema = null;
+      return;
+    }
+    await loadAndRenderBuildForm(wbType, null);
+  });
+
+  // Download button
+  document.getElementById('btn-build-download').addEventListener('click', () => {
+    const config = exportBuildConfig();
+    if (!config) return;
+
+    const json     = JSON.stringify(config, null, 2);
+    const blob     = new Blob([json], { type: 'application/json' });
+    const shortMap = { daily_diagnostics: 'dd', executive_summary: 'es', weekly_cross_channel: 'wcc' };
+    const baseName = shortMap[buildState.workbookType] ?? 'config';
+    downloadBlob(blob, `${baseName}_config.json`);
+    showStatus('status-build', 'success', 'Config downloaded.', `${baseName}_config.json`);
   });
 </script>
 </body>
