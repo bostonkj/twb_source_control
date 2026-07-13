@@ -73,6 +73,7 @@ function updateRenamedFields(doc: Document, config: Config): void {
     );
     if (!column) continue;
     const calc = ensureElement(doc, column, 'calculation');
+    calc.setAttribute('class', 'tableau');
     calc.setAttribute('formula', `[${targetField}]`);
     column.setAttribute('caption', friendlyName);
   }
