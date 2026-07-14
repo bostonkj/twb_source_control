@@ -21,7 +21,7 @@ export function detectWorkbook(doc: Document): WorkbookName {
   if (sheetSet.has('Channel Contribution') && sheetSet.has('Channel Trends')) {
     return 'daily_diagnostics';
   }
-  if (sheetSet.has('Contribution Type (LY)') && sheetSet.has('Funnel Stage (Trend)')) {
+  if (sheetSet.has('Contribution Type (Table #)') && sheetSet.has('Funnel Stage (Table #)')) {
     return 'executive_summary';
   }
   if (sheetSet.has('Icon Date Range') && sheetSet.has('Icon Funnel Stage')) {
@@ -229,4 +229,3 @@ export function extractConfig(doc: Document): WorkbookConfig {
 
 function main(): void {
 }
-

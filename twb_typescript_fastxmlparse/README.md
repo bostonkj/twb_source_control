@@ -1,40 +1,51 @@
-# tableau-twb-tools
+# twb_typescript_fastxmlparse (discontinued)
 
-TypeScript utilities for Tableau `.twb` files using `@xmldom/xmldom` + `xpath`.
+First go at a TypeScript CLI for extracting, patching, and stripping Tableau `.twb` workbooks. Discontinued due to library incompatibility
 
-## Why this version
+## Structure
 
-This build avoids the `fast-xml-parser` issues you hit:
-- `Maximum nested tags exceeded`
-- Tableau-unfriendly attribute serialization like `custom` instead of `custom="true"`
+```
+twb_typescript_fastxmlparse/
+  src/
+    xml.ts                — Shared DOM helpers (readXml, writeXml, selectAll, attr, ...)
+    extract-config.ts     — Config extraction from a workbook
+    patch-twb.ts          — Applies a JSON config to a template workbook
+    strip-data.ts         — Removes connection metadata for source-control-safe copies
+  configs/                — Sample and extracted config files
+  workbooks/              — Input workbooks used during development
+  output/                 — Generated output files from CLI runs
+```
 
-## Install
+## Install & build
 
 ```bash
 npm install
 npm run build
 ```
 
-## Extract config from a workbook
+## CLI usage
 
+**Extract a config from a workbook**
 ```bash
-npm run extract-config -- "/absolute/path/to/Daily Diagnostics.twb" "./configs/from-workbook.json"
+node dist/src/extract-config.js "/path/to/workbook.twb" "./configs/output.json"
 ```
 
-## Strip connection/data metadata
-
+**Strip connection metadata from a workbook**
 ```bash
-npm run strip-data -- "/absolute/path/to/Daily Diagnostics.twb" "./output/Daily_Diagnostics_stripped.twb"
+node dist/src/strip-data.js "/path/to/workbook.twb" "./output/stripped.twb"
 ```
 
-## Patch a workbook from config
-
+**Patch a template workbook with a config**
 ```bash
-npm run patch -- "./configs/from-workbook.json" "./output/Daily_Diagnostics_stripped.twb" "./output/patched.twb"
+node dist/src/patch-twb.js "./configs/client.json" "./workbooks/template.twb" "./output/patched.twb"
 ```
 
-## Notes
+---
 
-- `extract-config` produces a starter JSON config you should review before using for production patches.
-- `strip-data` is conservative: it removes connection and metadata blocks while preserving workbook structure.
-- `patch` is scoped to datasource paths, renamed-field calcs, parameter defaults/member lists, and parameter-driven CASE calcs.
+## Why this project was discontinued
+
+This project was the first working implementation of the TWB toolchain and was used to validate the core approach. It was superseded by `twb_typescript_xmldom` for two reasons:
+
+**1. Nesting depth**: Tableau workbooks routinely exceed `fast-xml-parser`'s default tag nesting limit of 256, causing `Maximum nested tags exceeded` errors.
+**2. Attribute serialization**: `fast-xml-parser` uses a JavaScript object to for its mapping, causing changes how some attributes were written back
+-  `custom="true"` would return `custom` causing load issues in tableau.

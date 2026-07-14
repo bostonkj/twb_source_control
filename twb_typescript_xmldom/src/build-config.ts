@@ -48,9 +48,9 @@ export type StatusCallbacks = {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 export const WORKBOOK_SCHEMAS: Record<WorkbookType, string> = {
-  daily_diagnostics:    '/configs/mkuk_dd.json',
-  executive_summary:    '/configs/mkuk_es.json',
-  weekly_cross_channel: '/configs/mkuk_wcc.json',
+  daily_diagnostics:    '/configs/dd.json',
+  executive_summary:    '/configs/es.json',
+  weekly_cross_channel: '/configs/wcc.json',
 };
 
 // Suffixes / prefixes that mark a calc as a derived variant of a canonical one.
