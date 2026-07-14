@@ -29,7 +29,6 @@ The key insight for this project: almost everything that differs between clients
 
 Reference files for the XML structure are in `reading tableau files/`:
 
-- `minimal_tableau_workbook_reference.twb` — a stripped-down workbook showing each major XML section with one example each
 - `minimal_tableau_workbook_reference_commented.twb` — the same file with inline XML comments explaining each section
 
 ---
@@ -132,7 +131,6 @@ twb_source_control/
   README.md                               — this file
   reading tableau files/                  — reference workbooks for learning the XML format
   chat summary/                           — notes from early research phases
-  example_architecutre/                   — sketches of the intended file/folder layout
   presentation/                           — presentation notes for the project overview
   twb_typescript_fastxmlparse/            — first attempt (fast-xml-parser, not recommended)
   twb_typescript_xmldom/                  — active project (@xmldom/xmldom + xpath)
