@@ -192,8 +192,10 @@ export async function loadAndRenderBuildForm(
 /**
  * Renders the renamed-fields section.
  *
- * Each row shows a source field name (read-only) and an editable display-name
- * input pre-filled from existingFields (if provided) or the template default.
+ * Each row shows, left to right: the field's raw name in the datasource
+ * (read-only), the field's default name in the blank template (read-only —
+ * always shown, even once overridden), and an editable display-name input
+ * pre-filled from existingFields (if provided) or the template default.
  */
 export function renderRenamedFields(
   templateFields: RenamedFields,
@@ -221,8 +223,9 @@ export function renderRenamedFields(
     const row = document.createElement('div');
     row.className = 'renamed-row';
     row.innerHTML = `
-      <span class="renamed-source" title="${esc(sourceField)}">${esc(sourceField)}</span>
+      <span class="renamed-source" title="Name in the datasource: ${esc(sourceField)}">${esc(sourceField)}</span>
       <span class="renamed-arrow">→</span>
+      <span class="renamed-default" title="Default name in the blank template">${esc(defaultFriendly)}</span>
       <input class="renamed-input" type="text"
              value="${esc(friendlyName)}"
              data-source="${esc(sourceField)}"

@@ -484,7 +484,7 @@
     /* Renamed fields */
     .renamed-row {
       display: grid;
-      grid-template-columns: 1fr 18px 1fr;
+      grid-template-columns: 1fr 18px 1fr 1fr;
       align-items: center;
       gap: 8px;
       padding: 5px 16px;
@@ -523,6 +523,15 @@
 
     .renamed-input:hover:not(:focus) { border-color: var(--border-hi); }
     .renamed-input:focus { outline: none; border-color: var(--accent); }
+
+    .renamed-default {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     /* KPI groups */
     .kpi-group {
@@ -872,7 +881,7 @@
         <div class="build-section">
           <div class="build-section-head">
             <div class="build-section-title">Renamed Fields</div>
-            <div class="build-section-desc">Source field name from Tableau (left) mapped to the display name shown in the workbook (right, editable).</div>
+            <div class="build-section-desc">Left to right: the field's raw name in the datasource, its default name in the blank template, and the display name to use for this workbook (editable).</div>
           </div>
           <div id="build-renamed-list" class="build-list"></div>
         </div>
