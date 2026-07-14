@@ -6,7 +6,3 @@ dist/
 *.zip
 output/
 workbooks/
-<<<<<<< HEAD
-*.mjs
-=======
->>>>>>> 31a9bfd (cleaning)

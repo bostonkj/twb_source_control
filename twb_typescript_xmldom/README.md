@@ -28,29 +28,13 @@ npm install
 npm run build
 ```
 
-<<<<<<< HEAD
-## Run Instructions (UI)
-
-From the project Directory:
-
-```bash
-npx ts-node server.ts
-```
-The UI will be live at http://localhost:3000
-
-
-## Run instructions (CLI)
-
-### 1. Extract a config from a workbook
-=======
 ## Run
->>>>>>> 31a9bfd (cleaning)
 
 ```bash
 node server.ts
 ```
 
-Then open `http://localhost:3000` in your browser.
+The UI will be live at `http://localhost:3000` in your browser.
 
 ## CLI usage
 
