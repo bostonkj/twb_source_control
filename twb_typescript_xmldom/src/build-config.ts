@@ -78,6 +78,28 @@ function esc(val: unknown): string {
     .replace(/>/g, '&gt;');
 }
 
+// ─── KPI display ordering ─────────────────────────────────────────────────────
+
+/**
+ * Sort key for the KPI Parameters section: anything "Primary"-related first,
+ * anything "Secondary"-related second, then plain "KPI 1", "KPI 2", ... in
+ * numerical order. Anything else falls after, in whatever order it was
+ * already in (stable sort).
+ *
+ * Matching on the word "Primary"/"Secondary" anywhere in the name (rather
+ * than requiring an exact "Primary KPI") is deliberate: workbooks aren't
+ * consistent about the exact spelling — Weekly Cross Channel names its main
+ * calcs "Primary  KPI TY" / "Secondary  KPI TY" (double space, "TY" suffix),
+ * which wouldn't match a strict equality check.
+ */
+function kpiSortKey(name: string): [number, number] {
+  if (/\bPrimary\b/.test(name)) return [0, 0];
+  if (/\bSecondary\b/.test(name)) return [1, 0];
+  const match = name.match(/^KPI\s+(\d+)$/);
+  if (match) return [2, parseInt(match[1], 10)];
+  return [3, 0];
+}
+
 // ─── analyzeCalcs ─────────────────────────────────────────────────────────────
 
 /**
@@ -90,6 +112,10 @@ function esc(val: unknown): string {
  *
  * A canonical calc is dimension-type if its option keys include "Date" or its
  * name contains "Dimension"; otherwise it is KPI-type.
+ *
+ * kpiCalcs is returned ordered primary, secondary, then numbered KPIs in
+ * order — the raw extraction order (whatever order fields happened to
+ * appear in the .twb) made the Build Config UI hard to scan.
  */
 export function analyzeCalcs(parameterCalcs: ParameterCalcs): CalcAnalysis {
   const names      = Object.keys(parameterCalcs);
@@ -134,6 +160,11 @@ export function analyzeCalcs(parameterCalcs: ParameterCalcs): CalcAnalysis {
     return keys.includes('Date') || n.includes('Dimension');
   });
   const kpiCalcs = canonicals.filter(n => !dimCalcs.includes(n));
+  kpiCalcs.sort((a, b) => {
+    const [priorityA, numA] = kpiSortKey(a);
+    const [priorityB, numB] = kpiSortKey(b);
+    return priorityA !== priorityB ? priorityA - priorityB : numA - numB;
+  });
 
   return { kpiCalcs, dimCalcs, variantOf };
 }
@@ -192,6 +223,10 @@ export async function loadAndRenderBuildForm(
 /**
  * Renders the renamed-fields section.
  *
+ * templateFields and existingFields are keyed by the field's raw name in the
+ * datasource, mapped to its friendly (display) name:
+ *   { "customDimension1": "Custom Dimension 1" }
+ *
  * Each row shows, left to right: the field's raw name in the datasource
  * (read-only), the field's default name in the blank template (read-only —
  * always shown, even once overridden), and an editable display-name input
@@ -210,16 +245,8 @@ export function renderRenamedFields(
     return;
   }
 
-  // Build a reverse map: sourceField → friendlyName, from the imported config.
-  const existingReverse: Record<string, string> = {};
-  if (existingFields) {
-    for (const [friendly, source] of Object.entries(existingFields)) {
-      existingReverse[source] = friendly;
-    }
-  }
-
-  for (const [defaultFriendly, sourceField] of entries) {
-    const friendlyName = existingReverse[sourceField] ?? defaultFriendly;
+  for (const [sourceField, defaultFriendly] of entries) {
+    const friendlyName = existingFields?.[sourceField] ?? defaultFriendly;
     const row = document.createElement('div');
     row.className = 'renamed-row';
     row.innerHTML = `
@@ -411,12 +438,12 @@ export function exportBuildConfig(): BuildConfig | null {
     color_palettes:    schema.color_palettes    ?? [],
   };
 
-  // 1. Renamed fields — read display name from each input; key by friendly name.
+  // 1. Renamed fields — read display name from each input; key by source field name.
   for (const input of document.querySelectorAll<HTMLInputElement>('#build-renamed-list .renamed-input')) {
     const sourceField  = input.dataset['source'];
     const friendlyName = input.value.trim();
     if (sourceField && friendlyName) {
-      config.renamed_fields[friendlyName] = sourceField;
+      config.renamed_fields[sourceField] = friendlyName;
     }
   }
 
