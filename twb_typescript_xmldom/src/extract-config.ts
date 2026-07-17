@@ -10,8 +10,7 @@ export type WorkbookName =
   | 'executive_summary'
   | 'weekly_cross_channel';
 
-// Maps a TWB file path to its canonical workbook name by inspecting
-// unique sheet names that exist in each workbook.
+// Identifies the workbook type by sheet names unique to each template.
 export function detectWorkbook(doc: Document): WorkbookName {
   const sheets = selectAll<Element>(doc, '//worksheet')
     .map((ws) => attr(ws, 'name'))
@@ -43,8 +42,8 @@ type RenamedFields = Record<string, string>;
 type CalculatedFields = Record<string, string>;
 type ColorPalette = { name: string; type: string; colors: string[] };
 
-// Collects unique datasource names and their repository-location paths.
-// Datasources that appear multiple times keep only their first non-empty path.
+// Collects unique datasource names and their repository-location paths
+// (first non-empty path wins for duplicates).
 function extractDatasources(doc: Document): Datasource[] {
   const seen = new Map<string, string>();
 
@@ -64,9 +63,7 @@ function extractDatasources(doc: Document): Datasource[] {
   }));
 }
 
-// Extracts simple renamed-field formulas of the form [SomeField].
-// Keyed by the field's raw name in the datasource, mapped to its friendly
-// (display) name — e.g. { "customDimension1": "Custom Dimension 1" }.
+// Extracts simple [SomeField] passthrough renames, keyed raw name → friendly name.
 function extractRenamedFields(doc: Document): RenamedFields {
   const out: RenamedFields = {};
   for (const col of selectAll<Element>(doc, '//column[@caption]')) {
@@ -110,14 +107,8 @@ function extractParameterCalcs(doc: Document): ParameterCalcs {
     const formula = attr(selectOne<Element>(col, './calculation'), 'formula');
     if (!name || !formula) continue;
     const mapping: Record<string, string> = {};
-    // WHEN conditions may be single- or double-quoted (Tableau accepts both,
-    // and branches added at different times often mix styles within the same
-    // CASE), and THEN expressions routinely span multiple lines. The old
-    // regex only matched double-quoted conditions and used '.' (no dotAll),
-    // so any branch whose value needed to cross a line to reach the next
-    // double-quoted WHEN — or whose only neighbor was single-quoted — was
-    // silently dropped instead of extracted. [\s\S] matches across newlines
-    // without needing the 's' flag, and the alternation accepts either quote.
+    // WHEN conditions may be single- or double-quoted and THEN expressions
+    // span multiple lines — the alternation and [\s\S] handle both.
     const regex = /WHEN\s+(?:"([^"]+)"|'([^']+)')\s+THEN\s+([\s\S]+?)(?=\s*WHEN\s+(?:"|')|\s*END\s*$)/g;
     for (const match of formula.matchAll(regex)) {
       const label = match[1] ?? match[2];
@@ -181,8 +172,7 @@ type BaseConfig = {
   color_palettes: ColorPalette[];
 };
 
-// All three workbooks share the same config shape; workbook-specific logic lives
-// in the extraction routing below rather than in separate types.
+// All three workbooks share the same config shape.
 type WorkbookConfig = BaseConfig;
 
 // ─── Per-workbook extractors ──────────────────────────────────────────────────

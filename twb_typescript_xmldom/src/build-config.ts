@@ -80,18 +80,8 @@ function esc(val: unknown): string {
 
 // ─── KPI display ordering ─────────────────────────────────────────────────────
 
-/**
- * Sort key for the KPI Parameters section: anything "Primary"-related first,
- * anything "Secondary"-related second, then plain "KPI 1", "KPI 2", ... in
- * numerical order. Anything else falls after, in whatever order it was
- * already in (stable sort).
- *
- * Matching on the word "Primary"/"Secondary" anywhere in the name (rather
- * than requiring an exact "Primary KPI") is deliberate: workbooks aren't
- * consistent about the exact spelling — Weekly Cross Channel names its main
- * calcs "Primary  KPI TY" / "Secondary  KPI TY" (double space, "TY" suffix),
- * which wouldn't match a strict equality check.
- */
+// Sort key: Primary first, Secondary second, then numbered KPIs, rest last.
+// Word-match (not equality) because spellings vary — e.g. WCC's "Primary  KPI TY".
 function kpiSortKey(name: string): [number, number] {
   if (/\bPrimary\b/.test(name)) return [0, 0];
   if (/\bSecondary\b/.test(name)) return [1, 0];
@@ -103,19 +93,10 @@ function kpiSortKey(name: string): [number, number] {
 // ─── analyzeCalcs ─────────────────────────────────────────────────────────────
 
 /**
- * Partitions parameter_calcs into canonical KPI calcs, canonical dimension calcs,
- * and a map from each canonical to its list of variant names.
- *
- * A calc is a variant if its name ends with a known suffix (e.g. " LY") or
- * starts with a known prefix (e.g. "Plan ") and a base calc with the remainder
- * of the name exists in the same set.
- *
- * A canonical calc is dimension-type if its option keys include "Date" or its
- * name contains "Dimension"; otherwise it is KPI-type.
- *
- * kpiCalcs is returned ordered primary, secondary, then numbered KPIs in
- * order — the raw extraction order (whatever order fields happened to
- * appear in the .twb) made the Build Config UI hard to scan.
+ * Partitions parameter_calcs into canonical KPI calcs, dimension calcs, and a
+ * canonical → variants map. A calc is a variant if stripping a known
+ * suffix/prefix yields an existing base; dimension-type if its option keys
+ * include "Date" or its name contains "Dimension". kpiCalcs is sorted for the UI.
  */
 export function analyzeCalcs(parameterCalcs: ParameterCalcs): CalcAnalysis {
   const names      = Object.keys(parameterCalcs);
@@ -182,11 +163,7 @@ export async function loadBuildSchema(workbookType: WorkbookType): Promise<Build
 
 // ─── loadAndRenderBuildForm ───────────────────────────────────────────────────
 
-/**
- * Fetches the schema for the given workbook type, updates buildState, and
- * renders all three form sections. Status feedback is delegated to the
- * provided callbacks so this module stays independent of the HTML's status UI.
- */
+// Fetches the schema, updates buildState, and renders all three form sections.
 export async function loadAndRenderBuildForm(
   workbookType: WorkbookType,
   callbacks: Pick<StatusCallbacks, 'showStatus' | 'clearStatus'>,
@@ -221,16 +198,9 @@ export async function loadAndRenderBuildForm(
 // ─── renderRenamedFields ──────────────────────────────────────────────────────
 
 /**
- * Renders the renamed-fields section.
- *
- * templateFields and existingFields are keyed by the field's raw name in the
- * datasource, mapped to its friendly (display) name:
- *   { "customDimension1": "Custom Dimension 1" }
- *
- * Each row shows, left to right: the field's raw name in the datasource
- * (read-only), the field's default name in the blank template (read-only —
- * always shown, even once overridden), and an editable display-name input
- * pre-filled from existingFields (if provided) or the template default.
+ * Renders the renamed-fields section. Both maps are keyed by raw datasource
+ * name → friendly name. Each row: raw name (read-only), template default
+ * (read-only), editable display-name input.
  */
 export function renderRenamedFields(
   templateFields: RenamedFields,
@@ -265,14 +235,9 @@ export function renderRenamedFields(
 // ─── renderKpiParams ──────────────────────────────────────────────────────────
 
 /**
- * Renders the KPI parameter_calcs section.
- *
- * Each canonical KPI calc gets a checkbox group. Checked metrics are the ones
- * that will be included in the exported config. Variants are shown as a hint
- * and will automatically inherit the same metric selection on export.
- *
- * Calcs are identified by their index so the export step can correlate
- * checkboxes back to their calc + metric without fragile name-based lookup.
+ * Renders the KPI parameter_calcs section: a checkbox group per canonical KPI
+ * calc; variants inherit the selection on export. Calcs are identified by
+ * index so export avoids name-based lookup.
  */
 export function renderKpiParams(
   kpiCalcs:       string[],
@@ -333,14 +298,9 @@ export function renderKpiParams(
 // ─── renderDimMapping ─────────────────────────────────────────────────────────
 
 /**
- * Renders the dimension parameter_calcs section.
- *
- * When all dimension calcs share the same option keys, a single shared mapping
- * table is shown (one input per option). Each input carries a data-for-calcs
- * attribute listing all target calc names (newline-delimited) so the export
- * step can fan the value out to each.
- *
- * When option keys differ per calc, a separate block is rendered for each.
+ * Renders the dimension parameter_calcs section. If all dim calcs share the
+ * same option keys, one shared table is shown (inputs carry newline-delimited
+ * data-for-calcs for export fan-out); otherwise one block per calc.
  */
 export function renderDimMapping(
   dimCalcs:       string[],
@@ -417,13 +377,8 @@ export function renderDimMapping(
 
 // ─── exportBuildConfig ────────────────────────────────────────────────────────
 
-/**
- * Reads the current form state and builds a complete BuildConfig object ready
- * for JSON serialisation and download.
- *
- * KPI variant calcs inherit the same metric selection as their canonical, but
- * use the variant's own formula values from the schema.
- */
+// Builds a complete BuildConfig from the form. KPI variants inherit their
+// canonical's metric selection but use their own formulas from the schema.
 export function exportBuildConfig(): BuildConfig | null {
   const { schema, workbookType, kpiCalcs, dimCalcs, variantOf } = buildState;
   if (!schema || !workbookType) return null;
@@ -491,14 +446,7 @@ export function exportBuildConfig(): BuildConfig | null {
 
 // ─── initBuildTab ─────────────────────────────────────────────────────────────
 
-/**
- * Wires up the Build Config tab's DOM event listeners. Call once on page load,
- * passing the shared HTML utilities as callbacks.
- *
- * makeFileZone and the file-zone returned controller are owned by the caller;
- * this function only handles the workbook-type dropdown, the Toggle All buttons,
- * and the download button.
- */
+// Wires up the Build Config tab's event listeners. Call once on page load.
 export function initBuildTab(
   callbacks: StatusCallbacks,
   makeFileZone: (opts: {

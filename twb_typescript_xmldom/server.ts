@@ -1,18 +1,9 @@
 /**
- * server.ts
+ * Express API server wrapping the TWB toolchain. Run: node server.ts
  *
- * Minimal Express API server that wraps the three TWB toolchain scripts.
- * Each endpoint accepts multipart/form-data, runs the corresponding CLI
- * function in a temp directory, and streams the result back as a download.
- *
- * Usage:
- *   npx ts-node server.ts          (dev)
- *   node dist/server.js            (after tsc)
- *
- * Endpoints:
- *   POST /api/extract   field: twb          → application/json download
- *   POST /api/patch     fields: config, twb → application/octet-stream .twb download
- *   POST /api/strip     field: twb          → application/octet-stream .twb download
+ * POST /api/extract   field: twb          → config JSON download
+ * POST /api/patch     fields: config, twb → patched .twb download
+ * POST /api/strip     field: twb          → stripped .twb download
  */
 
 import express from 'express';
@@ -59,8 +50,6 @@ function cleanupUploads(files: Express.Multer.File[]): void {
 }
 
 // ─── POST /api/extract ────────────────────────────────────────────────────────
-// Accepts:  twb   (the workbook file)
-// Returns:  JSON config file as a download
 
 app.post(
   '/api/extract',
@@ -96,8 +85,6 @@ app.post(
 );
 
 // ─── POST /api/patch ──────────────────────────────────────────────────────────
-// Accepts:  config (JSON), twb (workbook template)
-// Returns:  Patched .twb as a download
 
 app.post(
   '/api/patch',
@@ -142,8 +129,6 @@ app.post(
 );
 
 // ─── POST /api/strip ──────────────────────────────────────────────────────────
-// Accepts:  twb (workbook file)
-// Returns:  Stripped .twb as a download
 
 app.post(
   '/api/strip',
