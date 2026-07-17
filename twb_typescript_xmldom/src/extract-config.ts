@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { attr, readXml, selectAll, selectOne } from './xml.js';
 
 // ─── Workbook identity ────────────────────────────────────────────────────────
@@ -239,4 +240,24 @@ export function extractConfig(doc: Document): WorkbookConfig {
 // ─── CLI entrypoint ───────────────────────────────────────────────────────────
 
 function main(): void {
+  const [inputPath, outputPath] = process.argv.slice(2);
+  if (!inputPath) {
+    console.error('Usage: node extract-config.js <workbook.twb> [output.json]');
+    process.exit(1);
+  }
+
+  const resolvedOutput =
+    outputPath ??
+    path.join(path.dirname(inputPath), `${path.basename(inputPath, '.twb')}_config.json`);
+
+  const doc = readXml(inputPath);
+  const config = extractConfig(doc);
+  fs.writeFileSync(resolvedOutput, JSON.stringify(config, null, 2), 'utf8');
+  console.log(`Detected workbook type: ${config.workbook}`);
+  console.log(`Config written to ${resolvedOutput}`);
+}
+
+// Run main() only when executed directly (not when imported by server.ts).
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main();
 }

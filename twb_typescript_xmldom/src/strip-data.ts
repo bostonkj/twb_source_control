@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { readXml, selectAll, writeXml } from './xml.js';
 
 // Removes each node in a list from its parent and returns the removal count.
@@ -48,4 +49,24 @@ export function stripAndSanitize(doc: Document): any {
 }
 
 function main(): void {
+  const [inputPath, outputPath] = process.argv.slice(2);
+  if (!inputPath) {
+    console.error('Usage: node strip-data.js <workbook.twb> [output.twb]');
+    process.exit(1);
+  }
+
+  const resolvedOutput =
+    outputPath ??
+    path.join(path.dirname(inputPath), `${path.basename(inputPath, '.twb')}_stripped.twb`);
+
+  const doc = readXml(inputPath);
+  const sanitizedConnections = stripAndSanitize(doc);
+  writeXml(resolvedOutput, doc);
+  console.log(`Sanitized ${sanitizedConnections} connection attribute(s)`);
+  console.log(`Stripped workbook written to ${resolvedOutput}`);
+}
+
+// Run main() only when executed directly (not when imported by server.ts).
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main();
 }

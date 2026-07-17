@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
 import { attr, ensureElement, readXml, selectAll, selectOne, writeXml } from './xml.js';
 import { type WorkbookName, detectWorkbook } from './extract-config.js';
@@ -119,6 +120,76 @@ function applyAliasSubstitution(formula: string, aliasMap: Map<string, string>):
   });
 }
 
+// ─── KPI dispatch resolution ───────────────────────────────────────────────────
+
+/**
+ * Maps each parameter's current caption to its real internal name, scoped to
+ * the Parameters datasource (parameters aren't duplicated the way data
+ * columns are, so this is a reliable source of truth — unlike a calc
+ * column's own existing formula, which may already be corrupted from an
+ * earlier patch run that didn't preserve dispatch correctly).
+ */
+function buildParameterCaptionMap(doc: Document): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const col of selectAll<Element>(doc, "//datasource[@name='Parameters']//column[@caption]")) {
+    const caption = attr(col, 'caption');
+    const name = attr(col, 'name');
+    if (caption && name) map.set(caption, name);
+  }
+  return map;
+}
+
+// Recognizes numbered KPI parameters ("KPI 1", "KPI 2", ...) and the
+// Primary/Secondary KPI parameters, whichever exact wording a given
+// workbook uses (e.g. Weekly Cross Channel's "Primary  KPI TY").
+function isKpiBaseCaption(caption: string): boolean {
+  return /^KPI\s+\d+$/.test(caption) || /\bPrimary\b/.test(caption) || /\bSecondary\b/.test(caption);
+}
+
+// Prefixes that can appear in front of a base KPI caption in a variant's
+// name (e.g. "Plan KPI 1" — the base is "KPI 1" once "Plan " is stripped).
+const KPI_VARIANT_PREFIXES = ['Plan ', '%-Str '];
+
+/**
+ * Resolves the real "[Parameters].[X]" dispatch expression for a KPI-family
+ * calc — "KPI 1 LY", "KPI 1 Previous Period", "Plan KPI 1", "KPI 1 Tooltip",
+ * "Primary KPI Contribution", "Primary KPI Label", etc. all dispatch on
+ * whichever base KPI parameter they're a variant of, which for Primary KPI,
+ * Secondary KPI, and (in this template) KPI 3/KPI 4 is a cryptic internal id
+ * that has nothing to do with the caption.
+ *
+ * Only returns a result for names clearly tied to a known KPI base caption;
+ * everything else (e.g. "Select Dimension" and its several genuinely
+ * independent duplicate parameters) returns null so the caller falls back
+ * to preserving whatever that specific column already dispatches on.
+ */
+function resolveKpiDispatch(calcName: string, paramCaptions: Map<string, string>): string | null {
+  const kpiBaseCaptions = [...paramCaptions.keys()].filter(isKpiBaseCaption);
+  if (!kpiBaseCaptions.length) return null;
+
+  const candidates = [calcName];
+  for (const prefix of KPI_VARIANT_PREFIXES) {
+    if (calcName.startsWith(prefix)) candidates.push(calcName.slice(prefix.length));
+  }
+
+  let best: string | null = null;
+  for (const candidate of candidates) {
+    for (const base of kpiBaseCaptions) {
+      if (candidate === base) {
+        if (!best || base.length > best.length) best = base;
+        continue;
+      }
+      if (candidate.startsWith(base) && /^[\s(]/.test(candidate[base.length] ?? ' ')) {
+        if (!best || base.length > best.length) best = base;
+      }
+    }
+  }
+  if (!best) return null;
+
+  const internalName = paramCaptions.get(best);
+  return internalName ? `[Parameters].${internalName}` : null;
+}
+
 // ─── Shared patch operations ──────────────────────────────────────────────────
 
 function updateDatasourcePaths(doc: Document, config: Config): void {
@@ -203,6 +274,7 @@ function extractDispatchExpr(formula: string): string | null {
 
 function updateParameterCalcs(doc: Document, config: Config): void {
   const aliasMap = buildPassthroughAliasMap(doc);
+  const paramCaptions = buildParameterCaptionMap(doc);
   for (const [calcName, mapping] of Object.entries(config.parameter_calcs ?? {})) {
     const lit = xpathLiteral(calcName);
     // Calculated fields can appear more than once: once in the "live"
@@ -233,18 +305,30 @@ function updateParameterCalcs(doc: Document, config: Config): void {
       if (!existingCalc) continue;
 
       // Numbered-KPI (and dimension-selector) variants — "KPI 1 LY", "KPI 1
-      // Previous Period", "Plan KPI 1", "Primary KPI Contribution", each
-      // duplicated "Select Dimension (copy)_..." parameter — all dispatch on
-      // whatever base parameter the template already wired them to, which is
-      // very often NOT the same as the calc's own caption/name (e.g. "KPI 1
-      // LY" dispatches on "[Parameters].[KPI 1]", and "Primary KPI
+      // Previous Period", "Plan KPI 1", "Primary KPI Contribution" — all
+      // dispatch on whatever base KPI parameter they're a variant of, which
+      // is very often NOT the same as the calc's own caption/name (e.g. "KPI
+      // 1 LY" dispatches on "[Parameters].[KPI 1]", and "Primary KPI
       // Contribution" dispatches on an internal id like "[Parameters].[KPI 4
-      // (copy)_...]"). Rebuilding the header from calcName pointed these at a
-      // parameter that doesn't exist, breaking the field. Instead, read
-      // whatever this specific column already dispatches on and keep it —
-      // only the WHEN/THEN body is meant to change.
+      // (copy)_...]"). For these, derive the correct dispatch from the
+      // Parameters datasource directly (reliable ground truth) rather than
+      // trusting this column's existing formula — if this file was ever
+      // patched by an older, buggier version of this tool that rebuilt the
+      // header from calcName, the existing formula is itself already
+      // corrupted (literally dispatching on e.g. "[Parameters].[KPI 1
+      // Previous Period]", which doesn't exist), and preserving it would
+      // just perpetuate the break instead of fixing it.
+      //
+      // For anything not clearly tied to a known KPI base (e.g. "Select
+      // Dimension", whose several duplicate copies are genuinely independent
+      // parameters, not corrupted clones of one canonical parameter), fall
+      // back to preserving whatever this specific column already dispatches
+      // on — only the WHEN/THEN body is meant to change there.
       const existingFormula = attr(existingCalc, 'formula');
-      const dispatchExpr = extractDispatchExpr(existingFormula) ?? `[Parameters].[${calcName}]`;
+      const dispatchExpr =
+        resolveKpiDispatch(calcName, paramCaptions) ??
+        extractDispatchExpr(existingFormula) ??
+        `[Parameters].[${calcName}]`;
       existingCalc.setAttribute('formula', buildCaseFormula(dispatchExpr, resolvedMapping));
     }
   }
@@ -376,5 +460,28 @@ export function patchWorkbook(doc: Document, config: Config): any {
 }
 
 function main(): void {
+  const [configPath, templatePath, outputPath] = process.argv.slice(2);
+  if (!configPath || !templatePath) {
+    console.error('Usage: node patch-twb.js <config.json|yaml> <template.twb> [output.twb]');
+    process.exit(1);
+  }
 
+  const resolvedOutput =
+    outputPath ??
+    path.join(path.dirname(templatePath), `${path.basename(templatePath, '.twb')}_patched.twb`);
+
+  const rawConfig = fs.readFileSync(configPath, 'utf8');
+  const config = /\.ya?ml$/i.test(configPath)
+    ? (yaml.load(rawConfig) as Config)
+    : (JSON.parse(rawConfig) as Config);
+
+  const doc = readXml(templatePath);
+  patchWorkbook(doc, config);
+  writeXml(resolvedOutput, doc);
+  console.log(`Patched workbook written to ${resolvedOutput}`);
+}
+
+// Run main() only when executed directly (not when imported by server.ts).
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main();
 }
